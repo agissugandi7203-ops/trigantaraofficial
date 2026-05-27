@@ -1,14 +1,29 @@
-import 'dotenv/config'; // MUST be first — loads .env into process.env
-
-// Catch startup/runtime crashes and log them verbosely
+// ============================================
+// GLOBAL CRASH HANDLERS — must be first
+// ============================================
 process.on('uncaughtException', (err) => {
   console.error('[FATAL] Uncaught Exception:', err);
   process.exit(1);
 });
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('[FATAL] Unhandled Rejection at:', promise, 'reason:', reason);
+process.on('unhandledRejection', (reason) => {
+  console.error('[FATAL] Unhandled Rejection:', reason);
   process.exit(1);
 });
+
+console.log('[BOOT] Starting Trigantara server...');
+console.log('[BOOT] NODE_ENV =', process.env.NODE_ENV);
+console.log('[BOOT] PORT =', process.env.PORT);
+
+// Load dotenv ONLY in dev (in production, env vars are injected by Cloud Run)
+if (process.env.NODE_ENV !== 'production') {
+  try {
+    const dotenv = require('dotenv');
+    dotenv.config();
+    console.log('[BOOT] dotenv loaded for development');
+  } catch {
+    console.log('[BOOT] dotenv not available, skipping');
+  }
+}
 
 import express from 'express';
 import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectCommand } from '@aws-sdk/client-s3';
@@ -17,13 +32,15 @@ import { createClient } from '@supabase/supabase-js';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
+console.log('[BOOT] Modules imported successfully');
+
 const app = express();
 app.use(express.json({ limit: '1mb' }));
 
 // ============================================
 // Environment & Config
 // ============================================
-const PORT = parseInt(process.env.PORT || '3000');
+const PORT = parseInt(process.env.PORT || '8080');
 const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || '';
 const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID || '';
 const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY || '';
@@ -32,6 +49,8 @@ const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || ''; // e.g., https://pub-xxx.
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || '';
+
+console.log('[BOOT] Config parsed. PORT =', PORT);
 
 // ============================================
 // S3/R2 Client
@@ -450,45 +469,54 @@ async function pingSupabase() {
 // STARTUP (Dev + Production)
 // ============================================
 async function startServer() {
-  const isProd = process.env.NODE_ENV === 'production';
+  try {
+    console.log('[BOOT] startServer() called');
+    const isProd = process.env.NODE_ENV === 'production';
 
-  if (isProd) {
-    // Production: serve static built files
-    const distPath = path.resolve(process.cwd(), 'dist');
-    app.use(express.static(distPath));
+    if (isProd) {
+      console.log('[BOOT] Production mode — setting up static file serving');
+      // Production: serve static built files
+      const distPath = path.resolve(process.cwd(), 'dist');
+      app.use(express.static(distPath));
 
-    // Also serve /assets and /public from root (logos, angkatan photos, etc.)
-    app.use('/assets', express.static(path.resolve(process.cwd(), 'assets')));
-    app.use('/public', express.static(path.resolve(process.cwd(), 'public')));
+      // Also serve /assets and /public from root (logos, angkatan photos, etc.)
+      app.use('/assets', express.static(path.resolve(process.cwd(), 'assets')));
+      app.use('/public', express.static(path.resolve(process.cwd(), 'public')));
 
-    // SPA fallback: serve index.html for all non-API routes
-    app.get('*', (req, res) => {
-      if (req.path.startsWith('/api/')) {
-        res.status(404).json({ error: 'API endpoint not found' });
-        return;
-      }
-      res.sendFile(path.join(distPath, 'index.html'));
+      // SPA fallback: serve index.html for all non-API routes
+      app.get('*', (req, res) => {
+        if (req.path.startsWith('/api/')) {
+          res.status(404).json({ error: 'API endpoint not found' });
+          return;
+        }
+        res.sendFile(path.join(distPath, 'index.html'));
+      });
+    } else {
+      console.log('[BOOT] Development mode — starting Vite dev server');
+      // Development: use Vite dev server
+      const { createServer: createViteServer } = await import('vite');
+      const vite = await createViteServer({
+        server: { middlewareMode: true },
+        appType: 'spa',
+      });
+      app.use(vite.middlewares);
+    }
+
+    // Start keep-alive cron
+    startKeepAlive();
+
+    console.log('[BOOT] Calling app.listen on port', PORT);
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`\n  🏕️  Trigantara Server (${isProd ? 'PRODUCTION' : 'DEVELOPMENT'})`);
+      console.log(`  ➜  http://0.0.0.0:${PORT}`);
+      console.log(`  ➜  R2: ${s3Client ? '✅ Aktif' : '❌ Belum dikonfigurasi'}`);
+      console.log(`  ➜  Supabase: ${supabaseAdmin ? '✅ Aktif' : '❌ Belum dikonfigurasi'}`);
+      console.log(`  ➜  Keep-Alive: ${supabaseAdmin ? '✅ Setiap 12 jam' : '❌ Nonaktif'}\n`);
     });
-  } else {
-    // Development: use Vite dev server
-    const { createServer: createViteServer } = await import('vite');
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
-    });
-    app.use(vite.middlewares);
+  } catch (err) {
+    console.error('[FATAL] startServer crashed:', err);
+    process.exit(1);
   }
-
-  // Start keep-alive cron
-  startKeepAlive();
-
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`\n  🏕️  Trigantara Server (${isProd ? 'PRODUCTION' : 'DEVELOPMENT'})`);
-    console.log(`  ➜  http://0.0.0.0:${PORT}`);
-    console.log(`  ➜  R2: ${s3Client ? '✅ Aktif' : '❌ Belum dikonfigurasi'}`);
-    console.log(`  ➜  Supabase: ${supabaseAdmin ? '✅ Aktif' : '❌ Belum dikonfigurasi'}`);
-    console.log(`  ➜  Keep-Alive: ${supabaseAdmin ? '✅ Setiap 12 jam' : '❌ Nonaktif'}\n`);
-  });
 }
 
 startServer();
