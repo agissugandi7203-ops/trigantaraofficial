@@ -471,9 +471,9 @@ async function startServer() {
   // Start keep-alive cron
   startKeepAlive();
 
-  app.listen(PORT, () => {
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`\n  🏕️  Trigantara Server (${isProd ? 'PRODUCTION' : 'DEVELOPMENT'})`);
-    console.log(`  ➜  http://localhost:${PORT}`);
+    console.log(`  ➜  http://0.0.0.0:${PORT}`);
     console.log(`  ➜  R2: ${s3Client ? '✅ Aktif' : '❌ Belum dikonfigurasi'}`);
     console.log(`  ➜  Supabase: ${supabaseAdmin ? '✅ Aktif' : '❌ Belum dikonfigurasi'}`);
     console.log(`  ➜  Keep-Alive: ${supabaseAdmin ? '✅ Setiap 12 jam' : '❌ Nonaktif'}\n`);
