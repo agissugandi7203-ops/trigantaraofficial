@@ -477,19 +477,38 @@ async function startServer() {
       console.log('[BOOT] Production mode — setting up static file serving');
       // Production: serve static built files
       const distPath = path.resolve(process.cwd(), 'dist');
-      app.use(express.static(distPath));
+      app.use(express.static(distPath, { index: false }));
 
       // Also serve /assets and /public from root (logos, angkatan photos, etc.)
       app.use('/assets', express.static(path.resolve(process.cwd(), 'assets')));
       app.use('/public', express.static(path.resolve(process.cwd(), 'public')));
 
       // SPA fallback: serve index.html for all non-API routes
+      const fs = require('fs');
       app.get('*', (req, res) => {
         if (req.path.startsWith('/api/')) {
           res.status(404).json({ error: 'API endpoint not found' });
           return;
         }
-        res.sendFile(path.join(distPath, 'index.html'));
+        
+        const htmlPath = path.join(distPath, 'index.html');
+        fs.readFile(htmlPath, 'utf8', (err: any, data: string) => {
+          if (err) {
+            console.error('Failed to read index.html:', err);
+            res.status(500).send('Error loading frontend application.');
+            return;
+          }
+          
+          // Inject runtime environment variables for Vite frontend
+          const envScript = `<script>window.ENV = ${JSON.stringify({
+            VITE_SUPABASE_URL: process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '',
+            VITE_SUPABASE_ANON_KEY: process.env.VITE_SUPABASE_ANON_KEY || '',
+            VITE_R2_PUBLIC_URL: process.env.R2_PUBLIC_URL || process.env.VITE_R2_PUBLIC_URL || '',
+          })};</script>`;
+          
+          const modifiedHtml = data.replace('</head>', `${envScript}</head>`);
+          res.send(modifiedHtml);
+        });
       });
     } else {
       console.log('[BOOT] Development mode — starting Vite dev server');

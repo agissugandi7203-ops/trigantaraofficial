@@ -97,7 +97,7 @@ export async function uploadFileToR2(
  * Jika R2 belum punya custom domain, gunakan URL default.
  */
 export function getR2PublicUrl(key: string): string {
-  const r2PublicBase = import.meta.env.VITE_R2_PUBLIC_URL || '';
+  const r2PublicBase = import.meta.env.VITE_R2_PUBLIC_URL || (window as any).ENV?.VITE_R2_PUBLIC_URL || '';
   if (!r2PublicBase) {
     // Placeholder — ganti dengan URL R2 bucket Anda
     return `/api/files/${key}`;
