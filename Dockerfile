@@ -32,10 +32,11 @@ COPY --from=builder /app/assets ./assets
 
 # Set environment
 ENV NODE_ENV=production
-ENV PORT=3000
+# PORT is injected by Cloud Run at runtime (default 8080)
+# Do NOT hardcode PORT here — server.ts reads process.env.PORT
 
-# Expose port
-EXPOSE 3000
+# Expose port (Cloud Run uses 8080 by default)
+EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
