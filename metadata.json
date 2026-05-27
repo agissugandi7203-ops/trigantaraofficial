@@ -1,0 +1,6 @@
+{
+  "name": "Edukids",
+  "description": "A high-fidelity landing page for Edukids, a playful yet premium educational platform featuring children's learning activities, statistics, program options, and interactive course previews.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
