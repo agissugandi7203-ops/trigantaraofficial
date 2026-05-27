@@ -1,3 +1,4 @@
+import 'dotenv/config'; // MUST be first — loads .env into process.env
 import express from 'express';
 import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -444,6 +445,10 @@ async function startServer() {
     // Production: serve static built files
     const distPath = path.resolve(process.cwd(), 'dist');
     app.use(express.static(distPath));
+
+    // Also serve /assets and /public from root (logos, angkatan photos, etc.)
+    app.use('/assets', express.static(path.resolve(process.cwd(), 'assets')));
+    app.use('/public', express.static(path.resolve(process.cwd(), 'public')));
 
     // SPA fallback: serve index.html for all non-API routes
     app.get('*', (req, res) => {
