@@ -1,5 +1,5 @@
 # ===== Stage 1: Build =====
-FROM node:20-slim AS builder
+FROM node:22-slim AS builder
 
 WORKDIR /app
 
@@ -17,7 +17,7 @@ RUN npm run build
 
 # ===== Stage 2: Production =====
 # Server is fully self-contained in dist/server.cjs — no npm install needed
-FROM node:20-slim AS production
+FROM node:22-slim AS production
 
 WORKDIR /app
 
