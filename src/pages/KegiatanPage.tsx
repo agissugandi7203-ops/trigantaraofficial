@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
+import SubpageHeader from '../components/shared/SubpageHeader';
 import type { Event } from '../types';
 import { Calendar, MapPin, Compass, AlertCircle } from 'lucide-react';
 
@@ -36,21 +37,18 @@ export default function KegiatanPage() {
   const past = events.filter((e) => e.tanggal_mulai < today);
 
   return (
-    <main className="pt-24 min-h-screen bg-cream-bg text-brand-dark">
-      {/* Hero Banner */}
-      <section className="bg-brand-orange py-16 lg:py-20 text-center border-b-4 border-brand-dark relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none select-none">
-          <div className="absolute top-5 left-10 text-4xl opacity-15">📅</div>
-          <div className="absolute bottom-5 right-10 text-4xl opacity-15">🏕️</div>
-        </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-kids font-bold uppercase bg-brand-yellow text-brand-dark border-2 border-brand-dark shadow-[2px_2px_0_rgba(0,0,0,0.15)] mb-4">
-            Kalender Agenda
-          </span>
-          <h1 className="font-serif text-4xl sm:text-6xl font-black text-white tracking-tight mb-3">Kegiatan Kami</h1>
-          <p className="text-[#FAF6F0] text-sm sm:text-lg max-w-xl mx-auto font-sans font-medium opacity-90">Agenda dan dokumentasi kegiatan kepramukaan Gudep Trigantara.</p>
-        </div>
-      </section>
+    <main className="min-h-screen bg-cream-bg text-brand-dark">
+      {/* SubpageHeader replacing flat hero banner */}
+      <SubpageHeader
+        badge="Kalender Agenda"
+        title="Kegiatan Kami"
+        subtitle="Agenda dan dokumentasi kegiatan kepramukaan Gudep Trigantara."
+        bgVariant="green"
+        modelImage="/assets/model/shafa.png"
+        modelName="Shafa"
+        modelAlign="left"
+        modelSize="large"
+      />
 
       <section className="py-16 lg:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -60,10 +58,10 @@ export default function KegiatanPage() {
               <button
                 key={j.value}
                 onClick={() => setSearchParams(j.value === 'semua' ? {} : { filter: j.value })}
-                className={`px-4 py-1.5 text-xs sm:text-sm font-kids font-bold rounded-full border-2 transition-all cursor-pointer ${
+                className={`px-4 py-1.5 text-xs sm:text-sm font-kids font-bold rounded-full border transition-all cursor-pointer ${
                   activeFilter === j.value
-                    ? 'bg-brand-dark text-white border-brand-dark shadow-[2px_2px_0_rgba(0,0,0,0.15)]'
-                    : 'bg-white text-brand-dark border-brand-dark/20 hover:border-brand-dark'
+                    ? 'bg-brand-dark text-white border-brand-dark shadow-soft'
+                    : 'bg-white text-brand-dark border-brand-dark/10 hover:border-brand-dark/20'
                 }`}
               >
                 {j.label}
@@ -135,20 +133,20 @@ function EventCard({ event, index, past = false }: { event: Event; index: number
 
   return (
     <div ref={ref} className={`animate-slide-up stagger-${(index % 3) + 1} ${isVisible ? 'visible' : ''} flex`}>
-      <div className={`bg-cream-card rounded-3xl border-4 border-brand-dark overflow-hidden shadow-[6px_6px_0_#2A1B15] flex flex-col justify-between w-full hover:-translate-y-1 transition-all group ${past ? 'opacity-75' : ''}`}>
+      <div className={`bg-cream-card rounded-[2rem] border border-brand-dark/15 overflow-hidden shadow-soft hover:shadow-soft-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between w-full group ${past ? 'opacity-75' : ''}`}>
         <div>
           {event.foto_url ? (
-            <div className="h-44 overflow-hidden border-b-2 border-brand-dark relative bg-cream-dark">
+            <div className="h-44 overflow-hidden border-b border-brand-dark/10 relative bg-cream-dark">
               <img src={event.foto_url} alt={event.judul} className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500" loading="lazy" />
             </div>
           ) : (
-            <div className="h-44 border-b-2 border-brand-dark bg-brand-yellow/15 flex items-center justify-center relative">
+            <div className="h-44 border-b border-brand-dark/10 bg-brand-yellow/15 flex items-center justify-center relative">
               <Compass className="w-12 h-12 text-brand-orange/40" />
             </div>
           )}
           
           <div className="p-6">
-            <span className={`inline-block px-3 py-1 rounded-full text-xs font-kids font-bold border-2 border-brand-dark mb-4 shadow-[1.5px_1.5px_0_#2A1B15] ${jenisColors[event.jenis] || jenisColors.lainnya}`}>
+            <span className={`inline-block px-3 py-1 rounded-full text-xs font-kids font-bold border border-brand-dark/15 mb-4 shadow-soft ${jenisColors[event.jenis] || jenisColors.lainnya}`}>
               {event.jenis.toUpperCase()}
             </span>
             
@@ -164,7 +162,7 @@ function EventCard({ event, index, past = false }: { event: Event; index: number
           </div>
         </div>
 
-        <div className="px-6 pb-6 pt-2 space-y-3 font-kids font-bold text-xs sm:text-sm text-brand-dark/75 border-t border-brand-dark/10">
+        <div className="px-6 pb-6 pt-2 space-y-3 font-kids font-bold text-xs sm:text-sm text-brand-dark/75 border-t border-brand-dark/5">
           <p className="flex items-center gap-2.5 pt-2">
             <Calendar className="w-4 h-4 text-brand-orange shrink-0" />
             <span>{formatDate(event.tanggal_mulai)}{event.tanggal_selesai ? ` — ${formatDate(event.tanggal_selesai)}` : ''}</span>

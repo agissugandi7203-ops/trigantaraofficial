@@ -55,9 +55,9 @@ export default function MemberPods() {
             >
               {/* Image & Blob Container */}
               <div className="relative w-52 h-72 flex items-end justify-center select-none overflow-visible">
-                {/* Organic Blob Backdrop - Original compact size */}
+                {/* Organic Blob Backdrop */}
                 <div 
-                  className={`absolute bottom-0 w-44 h-44 left-0 right-0 mx-auto border-4 border-brand-dark shadow-[5px_5px_0_#2A1B15] z-0 transition-transform duration-300 group-hover:scale-[1.03] ${item.blobClass}`}
+                  className={`absolute bottom-0 w-44 h-44 left-0 right-0 mx-auto border border-brand-dark/10 shadow-soft z-0 transition-transform duration-300 group-hover:scale-[1.03] ${item.blobClass}`}
                   style={{ backgroundColor: item.blobColor }}
                 />
 
@@ -65,11 +65,11 @@ export default function MemberPods() {
                 <img
                   src={item.image}
                   alt={item.nama}
-                  className="absolute bottom-0 w-[280px] h-[250px] left-[-100%] right-[-100%] mx-auto z-10 object-cover object-top select-none pointer-events-none transition-transform duration-300 group-hover:scale-[1.03]"
+                  className="absolute bottom-0 w-[280px] h-[250px] left-[-100%] right-[-100%] mx-auto z-10 max-w-none object-cover object-top select-none pointer-events-none transition-transform duration-300 group-hover:scale-[1.03]"
                 />
 
                 {/* Floating Badge */}
-                <span className="absolute bottom-2 right-6 w-9 h-9 bg-white text-lg rounded-full border-2 border-brand-dark flex items-center justify-center select-none shadow-[2px_2px_0_#2A1B15] z-20 transition-transform duration-300 group-hover:scale-110">
+                <span className="absolute bottom-2 right-6 w-9 h-9 bg-white text-lg rounded-full border border-brand-dark/15 flex items-center justify-center select-none shadow-soft z-20 transition-transform duration-300 group-hover:scale-110">
                   {item.icon}
                 </span>
               </div>

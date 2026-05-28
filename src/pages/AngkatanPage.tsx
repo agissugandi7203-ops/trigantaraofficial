@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import SectionHeading from '../components/shared/SectionHeading';
+import SubpageHeader from '../components/shared/SubpageHeader';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import type { Angkatan, Member } from '../types';
 import { Users } from 'lucide-react';
@@ -40,21 +41,18 @@ export default function AngkatanPage() {
   const activeAngkatan = angkatanList.find((a) => a.id === activeTab);
 
   return (
-    <main className="pt-24 min-h-screen bg-cream-bg text-brand-dark">
-      {/* Hero Banner */}
-      <section className="bg-brand-orange py-16 lg:py-20 text-center border-b-4 border-brand-dark relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none select-none">
-          <div className="absolute top-5 left-10 text-4xl opacity-15">👥</div>
-          <div className="absolute bottom-5 right-10 text-4xl opacity-15">🏕️</div>
-        </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-kids font-bold uppercase bg-brand-yellow text-brand-dark border-2 border-brand-dark shadow-[2px_2px_0_rgba(0,0,0,0.15)] mb-4">
-            Arsip Sejarah
-          </span>
-          <h1 className="font-serif text-4xl sm:text-6xl font-black text-white tracking-tight mb-3">Arsip Angkatan</h1>
-          <p className="text-[#FAF6F0] text-sm sm:text-lg max-w-xl mx-auto font-sans font-medium opacity-90">Setiap angkatan punya ceritanya sendiri. Temukan jejak mereka di sini.</p>
-        </div>
-      </section>
+    <main className="min-h-screen bg-cream-bg text-brand-dark">
+      {/* SubpageHeader replacing flat hero banner */}
+      <SubpageHeader
+        badge="Arsip Sejarah"
+        title="Arsip Angkatan"
+        subtitle="Setiap angkatan punya ceritanya sendiri. Temukan jejak mereka di sini."
+        bgVariant="orange"
+        modelImage="/assets/model/kaisya.png"
+        modelName="Kaisya"
+        modelAlign="right"
+        modelSize="large"
+      />
 
       <section className="py-16 lg:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -101,7 +99,7 @@ function AngkatanDetail({ angkatan, members }: { angkatan: Angkatan; members: Me
     <div ref={ref} className={`animate-slide-up ${isVisible ? 'visible' : ''}`}>
       {/* Foto Bersama */}
       {angkatan.foto_bersama_url && (
-        <div className="relative rounded-[2rem] border-4 border-brand-dark overflow-hidden aspect-[21/9] mb-10 bg-cream-dark shadow-[8px_8px_0_#2A1B15] flex items-end">
+        <div className="relative rounded-[2rem] border border-brand-dark/15 overflow-hidden aspect-[21/9] mb-10 bg-cream-dark shadow-soft-lg flex items-end">
           <img
             src={angkatan.foto_bersama_url}
             alt={`Foto bersama ${angkatan.tahun_ajaran}`}
@@ -109,7 +107,7 @@ function AngkatanDetail({ angkatan, members }: { angkatan: Angkatan; members: Me
           />
           <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/50 via-transparent to-transparent pointer-events-none" />
           
-          <div className="bg-white border-2 border-brand-dark rounded-2xl p-4 m-4 sm:m-6 shadow-[4px_4px_0_#2A1B15] relative z-10 text-brand-dark text-left inline-block max-w-sm">
+          <div className="bg-white border border-brand-dark/10 rounded-2xl p-4 m-4 sm:m-6 shadow-soft relative z-10 text-brand-dark text-left inline-block max-w-sm">
             <h2 className="font-serif text-lg sm:text-2xl font-black leading-tight">
               {angkatan.nama_angkatan || `Angkatan ${angkatan.tahun_ajaran}`}
             </h2>
@@ -141,8 +139,8 @@ function AngkatanDetail({ angkatan, members }: { angkatan: Angkatan; members: Me
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
             {members.map((m) => (
-              <div key={m.id} className="bg-cream-card rounded-2xl border-4 border-brand-dark p-5 text-center shadow-[4px_4px_0_#2A1B15] hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center group">
-                <div className="w-18 h-18 rounded-full border-2 border-brand-dark overflow-hidden bg-white shadow-[2px_2px_0_#2A1B15] mb-4 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
+              <div key={m.id} className="bg-cream-card rounded-2xl border border-brand-dark/15 p-5 text-center shadow-soft hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center group">
+                <div className="w-18 h-18 rounded-full border border-brand-dark/10 overflow-hidden bg-white shadow-soft mb-4 flex items-center justify-center group-hover:scale-105 transition-all shrink-0">
                   {m.foto_url ? (
                     <img src={m.foto_url} alt={m.nama_lengkap} className="w-full h-full object-cover object-top" />
                   ) : (

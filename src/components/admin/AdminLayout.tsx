@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import ConfirmModal from '../../components/admin/ConfirmModal';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   LayoutDashboard,
   FileText,
@@ -100,41 +101,46 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       </div>
 
       {/* Sidebar overlay (mobile) */}
-      <div
-        className={`fixed inset-0 bg-black/40 z-40 lg:hidden transition-opacity duration-300 ${
-          sidebarOpen
-            ? 'opacity-100 pointer-events-auto'
-            : 'opacity-0 pointer-events-none'
-        }`}
-        onClick={() => setSidebarOpen(false)}
-      />
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-zinc-950/20 backdrop-blur-sm z-40 lg:hidden cursor-pointer"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Sidebar */}
       <aside
         style={{ width: `${sidebarWidth}px` }}
         className={`
           fixed z-50 flex flex-col
-          bg-white/80 backdrop-blur-xl
-          shadow-lg shadow-zinc-200/50
-          border border-zinc-200/60
-          transition-all duration-300 ease-in-out
+          bg-white/95 backdrop-blur-xl
+          shadow-soft-lg
+          border border-zinc-200/80
+          transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)
           overflow-hidden
 
           top-0 left-0 bottom-0
           lg:top-3 lg:left-3 lg:bottom-3
-          rounded-none lg:rounded-2xl
+          rounded-none lg:rounded-[2rem]
 
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0
         `}
       >
-        {/* Logo area */}
+        {/* Logo area with contrast badge */}
         <div className="p-4 border-b border-zinc-100 flex items-center gap-3 min-h-[72px]">
-          <img
-            src="/assets/logo/LOGO TRIGANTARA (2).webp"
-            alt="Trigantara"
-            className="w-10 h-10 shrink-0"
-          />
+          <div className="w-10 h-10 rounded-xl bg-white border border-zinc-200 shadow-soft p-1.5 flex items-center justify-center shrink-0">
+            <img
+              src="/assets/logo/LOGO TRIGANTARA (2).webp"
+              alt="Trigantara"
+              className="w-full h-full object-contain shrink-0"
+            />
+          </div>
           <div
             className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${
               collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
@@ -149,33 +155,36 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
         {/* Navigation */}
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto overflow-x-hidden">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              title={collapsed ? link.label : undefined}
-              onClick={() => setSidebarOpen(false)}
-              className={`
-                flex items-center gap-3 rounded-xl text-sm font-medium
-                transition-all duration-200
-                ${collapsed ? 'justify-center px-0 py-3' : 'px-4 py-3'}
-                ${
-                  isActive(link.path)
-                    ? 'bg-zinc-100 text-zinc-900 font-semibold shadow-sm'
-                    : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
-                }
-              `}
-            >
-              <link.icon className="w-5 h-5 shrink-0 stroke-[1.8]" />
-              <span
-                className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${
-                  collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
-                }`}
+          {NAV_LINKS.map((link) => {
+            const active = isActive(link.path);
+            return (
+              <Link
+                key={link.path}
+                to={link.path}
+                title={collapsed ? link.label : undefined}
+                onClick={() => setSidebarOpen(false)}
+                className={`
+                  flex items-center gap-3 rounded-xl text-sm font-kids font-bold
+                  transition-all duration-200
+                  ${collapsed ? 'justify-center px-0 py-3' : 'px-4 py-3'}
+                  ${
+                    active
+                      ? 'bg-brand-yellow/10 text-brand-dark border border-brand-yellow/20 shadow-soft'
+                      : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 border border-transparent'
+                  }
+                `}
               >
-                {link.label}
-              </span>
-            </Link>
-          ))}
+                <link.icon className={`w-5 h-5 shrink-0 stroke-[1.8] ${active ? 'text-brand-orange' : 'text-zinc-400'}`} />
+                <span
+                  className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${
+                    collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
+                  }`}
+                >
+                  {link.label}
+                </span>
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Footer */}
@@ -185,13 +194,13 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             to="/"
             title={collapsed ? 'Lihat Website' : undefined}
             className={`
-              flex items-center gap-3 rounded-xl text-sm
-              text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100
+              flex items-center gap-3 rounded-xl text-sm font-kids font-bold
+              text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 border border-transparent
               transition-colors
               ${collapsed ? 'justify-center px-0 py-2.5' : 'px-4 py-2.5'}
             `}
           >
-            <Globe className="w-5 h-5 shrink-0 stroke-[1.8]" />
+            <Globe className="w-5 h-5 shrink-0 stroke-[1.8] text-zinc-400" />
             <span
               className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${
                 collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
@@ -206,8 +215,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             onClick={handleLogout}
             title={collapsed ? 'Keluar' : undefined}
             className={`
-              flex items-center gap-3 w-full rounded-xl text-sm
-              text-red-500 hover:text-red-600 hover:bg-red-50
+              flex items-center gap-3 w-full rounded-xl text-sm font-kids font-bold
+              text-red-500 hover:text-red-600 hover:bg-red-50/50 border border-transparent
               transition-colors cursor-pointer
               ${collapsed ? 'justify-center px-0 py-2.5' : 'px-4 py-2.5'}
             `}
@@ -225,7 +234,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           {/* Collapse / Expand toggle (desktop only) */}
           <button
             onClick={() => setCollapsed((c) => !c)}
-            className="hidden lg:flex items-center justify-center w-full py-2 mt-1 rounded-xl text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors cursor-pointer"
+            className="hidden lg:flex items-center justify-center w-full py-2 mt-1 rounded-xl text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 border border-transparent transition-colors cursor-pointer"
             title={collapsed ? 'Perluas sidebar' : 'Kecilkan sidebar'}
           >
             {collapsed ? (

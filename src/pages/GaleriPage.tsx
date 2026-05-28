@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { KATEGORI_GALERI } from '../data/constants';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
+import SubpageHeader from '../components/shared/SubpageHeader';
 import type { GalleryItem } from '../types';
 import { Camera, X } from 'lucide-react';
 
@@ -31,21 +32,18 @@ export default function GaleriPage() {
   };
 
   return (
-    <main className="pt-24 min-h-screen bg-cream-bg text-brand-dark">
-      {/* Hero Banner */}
-      <section className="bg-brand-orange py-16 lg:py-20 text-center border-b-4 border-brand-dark relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none select-none">
-          <div className="absolute top-5 left-10 text-4xl opacity-15">📸</div>
-          <div className="absolute bottom-5 right-10 text-4xl opacity-15">⛺</div>
-        </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-kids font-bold uppercase bg-brand-yellow text-brand-dark border-2 border-brand-dark shadow-[2px_2px_0_rgba(0,0,0,0.15)] mb-4">
-            Dokumentasi Kegiatan
-          </span>
-          <h1 className="font-serif text-4xl sm:text-6xl font-black text-white tracking-tight mb-3">Galeri Foto</h1>
-          <p className="text-[#FAF6F0] text-sm sm:text-lg max-w-xl mx-auto font-sans font-medium opacity-90">Dokumentasi momen-momen berkesan bersama Pramuka Trigantara.</p>
-        </div>
-      </section>
+    <main className="min-h-screen bg-cream-bg text-brand-dark">
+      {/* SubpageHeader replacing flat hero banner */}
+      <SubpageHeader
+        badge="Dokumentasi Kegiatan"
+        title="Galeri Foto"
+        subtitle="Dokumentasi momen-momen berkesan bersama Pramuka Trigantara."
+        bgVariant="yellow"
+        modelImage="/assets/model/afika.png"
+        modelName="Afika"
+        modelAlign="left"
+        modelSize="large"
+      />
 
       <section className="py-16 lg:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -115,10 +113,10 @@ function FilterBtn({ label, value, active, onClick }: { label: string; value: st
   return (
     <button
       onClick={() => onClick(value)}
-      className={`px-4 py-1.5 text-xs sm:text-sm font-kids font-bold rounded-full border-2 transition-all cursor-pointer ${
+      className={`px-4 py-1.5 text-xs sm:text-sm font-kids font-bold rounded-full border transition-all cursor-pointer ${
         isActive
-          ? 'bg-brand-dark text-white border-brand-dark shadow-[2px_2px_0_rgba(0,0,0,0.15)]'
-          : 'bg-white text-brand-dark border-brand-dark/20 hover:border-brand-dark'
+          ? 'bg-brand-dark text-white border-brand-dark shadow-soft'
+          : 'bg-white text-brand-dark border-brand-dark/10 hover:border-brand-dark/20'
       }`}
     >
       {label}
@@ -130,11 +128,11 @@ function GaleriCard({ item, index, onClick }: { item: GalleryItem; index: number
   const { ref, isVisible } = useScrollAnimation();
   return (
     <div ref={ref} className={`animate-scale-in stagger-${(index % 5) + 1} ${isVisible ? 'visible' : ''} break-inside-avoid`}>
-      <div className="group relative overflow-hidden rounded-3xl border-4 border-brand-dark bg-cream-dark cursor-pointer shadow-[4px_4px_0_#2A1B15] hover:-translate-y-1 transition-all w-full" onClick={onClick}>
-        <img src={item.foto_url} alt={item.judul} className="w-full object-cover group-hover:scale-103 transition-transform duration-500" loading="lazy" />
+      <div className="group relative overflow-hidden rounded-[2rem] border border-brand-dark/15 bg-cream-dark cursor-pointer shadow-soft hover:shadow-soft-lg hover:-translate-y-1 transition-[transform,box-shadow] duration-300 w-full" onClick={onClick}>
+        <img src={item.foto_url} alt={item.judul} className="w-full object-cover group-hover:scale-103 transition-transform duration-500 will-change-transform" loading="lazy" />
         
         {/* Floating detail popup */}
-        <div className="absolute bottom-3 left-3 right-3 bg-white border-2 border-brand-dark rounded-2xl p-2.5 shadow-[3px_3px_0_#2A1B15] transform translate-y-[120%] group-hover:translate-y-0 transition-transform duration-300 pointer-events-none">
+        <div className="absolute bottom-3 left-3 right-3 bg-white border border-brand-dark/10 rounded-2xl p-2.5 shadow-soft transform translate-y-[120%] group-hover:translate-y-0 transition-transform duration-300 pointer-events-none">
           <p className="text-brand-dark font-kids font-bold text-xs sm:text-sm line-clamp-1">{item.judul}</p>
           {item.kategori && (
             <p className="text-brand-orange font-kids font-bold text-[9px] uppercase mt-0.5">{item.kategori}</p>
@@ -148,8 +146,8 @@ function GaleriCard({ item, index, onClick }: { item: GalleryItem; index: number
 function EmptyGallery() {
   return (
     <div className="text-center py-12">
-      <div className="bg-white p-8 md:p-12 rounded-3xl border-4 border-brand-dark shadow-[6px_6px_0_#2A1B15] max-w-md mx-auto text-center space-y-4">
-        <div className="w-16 h-16 rounded-full bg-brand-yellow/10 border-2 border-brand-dark flex items-center justify-center mx-auto">
+      <div className="bg-white p-8 md:p-12 rounded-[2rem] border border-brand-dark/15 shadow-soft max-w-md mx-auto text-center space-y-4">
+        <div className="w-16 h-16 rounded-full bg-brand-yellow/10 border border-brand-yellow/20 flex items-center justify-center mx-auto">
           <Camera className="w-8 h-8 text-brand-orange animate-pulse" />
         </div>
         <h3 className="font-serif text-xl font-bold text-brand-dark">Belum ada foto di galeri</h3>
@@ -163,10 +161,10 @@ function EmptyGallery() {
           { url: '/assets/angkatan/2025-2026/fotobersama26.webp', label: 'Angkatan 2025-2026' },
           { url: '/assets/angkatan/2026-2027/fotobersama27.webp', label: 'Angkatan 2026-2027' },
         ].map((img) => (
-          <div key={img.url} className="bg-white rounded-3xl border-4 border-brand-dark overflow-hidden shadow-[6px_6px_0_#2A1B15] flex flex-col group">
-            <div className="h-64 overflow-hidden border-b-4 border-brand-dark bg-cream-dark relative">
+          <div key={img.url} className="bg-white rounded-[2rem] border border-brand-dark/15 overflow-hidden shadow-soft hover:shadow-soft-lg transition-all duration-300 flex flex-col group">
+            <div className="h-64 overflow-hidden border-b border-brand-dark/10 bg-cream-dark relative">
               <img src={img.url} alt={img.label} className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500" />
-              <div className="absolute top-3 left-3 bg-brand-yellow text-brand-dark border-2 border-brand-dark px-3 py-1 rounded-full text-xs font-kids font-bold shadow-[2px_2px_0_#2A1B15]">
+              <div className="absolute top-3 left-3 bg-brand-yellow text-brand-dark border border-brand-dark/10 px-3 py-1 rounded-full text-xs font-kids font-bold shadow-soft">
                 Pramuka Marhas
               </div>
             </div>

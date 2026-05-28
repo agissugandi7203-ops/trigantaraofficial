@@ -29,14 +29,14 @@ const programDetails = [
     textClass: "text-brand-dark",
     badgeStyle: "bg-white text-brand-dark border-brand-dark",
     btnStyle: "bg-brand-dark text-white",
-    image: "/assets/model/Intan tari No BG.png",
+    image: "/assets/model/Alysia Fasma Nidai No BG.png",
     link: "/tentang"
   }
 ];
 
 export default function ProgramCards() {
   return (
-    <section className="py-20 lg:py-28 bg-cream-bg relative border-t-2 border-b-2 border-brand-dark/10">
+    <section className="py-20 lg:py-28 bg-cream-bg relative border-t border-b border-brand-dark/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
           badge="Program Kami"
@@ -61,7 +61,7 @@ export default function ProgramCards() {
         <div className="text-center mt-16">
           <Link
             to="/materi"
-            className="px-6 py-3 bg-white text-brand-dark font-kids font-bold rounded-full border-2 border-brand-dark shadow-[4px_4px_0_#2A1B15] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all inline-flex items-center gap-2"
+            className="px-8 py-4 bg-white text-brand-dark font-kids font-bold rounded-full border border-brand-dark/10 shadow-soft hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md transition-all inline-flex items-center gap-2"
           >
             <span>Pelajari Materi Pramuka Selengkapnya</span>
             <span>➔</span>
@@ -91,12 +91,12 @@ function ProgramCard({
       } flex`}
     >
       <div
-        className={`${details.bgClass} ${details.textClass} w-full rounded-3xl p-6 border-4 border-brand-dark shadow-[6px_6px_0_#2A1B15] flex flex-col justify-between min-h-[460px] group hover:-translate-y-2 transition-transform duration-300`}
+        className={`${details.bgClass} ${details.textClass} w-full rounded-[2.5rem] p-8 border border-brand-dark/15 shadow-soft hover:shadow-soft-lg flex flex-col justify-between min-h-[480px] group hover:-translate-y-2 transition-all duration-300`}
       >
         {/* Upper part */}
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <span className={`px-3 py-1 text-xs font-kids font-bold rounded-full border border-brand-dark ${details.badgeStyle}`}>
+            <span className={`px-3 py-1 text-xs font-kids font-bold rounded-full border border-brand-dark/15 ${details.badgeStyle}`}>
               {details.badge}
             </span>
             <span className="text-2xl bg-white/20 w-10 h-10 rounded-full flex items-center justify-center border border-white/20">
@@ -111,11 +111,11 @@ function ProgramCard({
         </div>
 
         {/* Picture Cutout Frame with absolute border */}
-        <div className="my-6 relative h-48 w-full rounded-2xl border-2 border-brand-dark bg-cream-bg overflow-hidden shadow-inner flex justify-center items-center">
+        <div className={`my-6 relative h-48 w-full rounded-[1.8rem] border border-brand-dark/15 overflow-hidden shadow-inner flex justify-center items-end ${index === 2 ? 'bg-brand-yellow/15 pt-4' : 'bg-cream-bg'}`}>
           <img
             src={details.image}
             alt={program.title}
-            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+            className={`${index === 2 ? 'h-[90%] w-auto object-contain' : 'w-full h-full object-cover object-center'} group-hover:scale-105 transition-transform duration-500`}
           />
           <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-brand-dark text-white text-[9px] font-bold rounded">
             Trigantara Gudep
@@ -126,7 +126,7 @@ function ProgramCard({
         <div>
           <Link
             to={details.link}
-            className={`block w-full py-2.5 px-4 rounded-xl text-xs font-kids font-bold uppercase tracking-wider text-center border-2 border-brand-dark ${details.btnStyle} shadow-[2px_2px_0_rgba(42,27,21,1)] active:translate-y-[1px] hover:-translate-y-0.5 transition-all`}
+            className={`block w-full py-3 px-4 rounded-full text-xs font-kids font-bold uppercase tracking-wider text-center border border-brand-dark/15 ${details.btnStyle} shadow-soft hover:-translate-y-0.5 active:translate-y-0 transition-all`}
           >
             Pelajari Detail ➔
           </Link>

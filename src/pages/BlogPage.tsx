@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
+import SubpageHeader from '../components/shared/SubpageHeader';
 import type { Article } from '../types';
 import { Calendar, User, Newspaper } from 'lucide-react';
 
@@ -30,21 +31,18 @@ export default function BlogPage() {
   ];
 
   return (
-    <main className="pt-24 min-h-screen bg-cream-bg text-brand-dark">
-      {/* Hero Banner */}
-      <section className="bg-brand-orange py-16 lg:py-20 text-center border-b-4 border-brand-dark relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none select-none">
-          <div className="absolute top-5 left-10 text-4xl opacity-15">📝</div>
-          <div className="absolute bottom-5 right-10 text-4xl opacity-15">⚜️</div>
-        </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-kids font-bold uppercase bg-brand-yellow text-brand-dark border-2 border-brand-dark shadow-[2px_2px_0_rgba(0,0,0,0.15)] mb-4">
-            Kabar & Informasi
-          </span>
-          <h1 className="font-serif text-4xl sm:text-6xl font-black text-white tracking-tight mb-3">Blog & Artikel</h1>
-          <p className="text-[#FAF6F0] text-sm sm:text-lg max-w-xl mx-auto font-sans font-medium opacity-90">Berita, tips, dan cerita dari keluarga besar Gudep Trigantara.</p>
-        </div>
-      </section>
+    <main className="min-h-screen bg-cream-bg text-brand-dark">
+      {/* SubpageHeader replacing flat hero banner */}
+      <SubpageHeader
+        badge="Kabar & Informasi"
+        title="Blog & Artikel"
+        subtitle="Berita, tips, dan cerita dari keluarga besar Gudep Trigantara."
+        bgVariant="green"
+        modelImage="/assets/model/mey.png"
+        modelName="Mey"
+        modelAlign="left"
+        modelSize="large"
+      />
 
       <section className="py-16 lg:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -111,20 +109,20 @@ function ArticleCard({ article, index }: { article: Article; index: number }) {
   return (
     <div ref={ref} className={`animate-slide-up stagger-${(index % 3) + 1} ${isVisible ? 'visible' : ''} flex`}>
       <Link to={`/blog/${article.slug}`} className="block w-full group">
-        <div className="bg-cream-card rounded-3xl border-4 border-brand-dark overflow-hidden shadow-[6px_6px_0_#2A1B15] flex flex-col justify-between h-full hover:-translate-y-1 transition-all">
+        <div className="bg-cream-card rounded-[2rem] border border-brand-dark/15 overflow-hidden shadow-soft hover:shadow-soft-lg hover:-translate-y-1 transition-[transform,box-shadow] duration-300 flex flex-col justify-between h-full">
           <div>
             {article.thumbnail_url ? (
-              <div className="aspect-[16/10] overflow-hidden border-b-2 border-brand-dark bg-cream-dark">
-                <img src={article.thumbnail_url} alt={article.judul} className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500" loading="lazy" />
+              <div className="aspect-[16/10] overflow-hidden border-b border-brand-dark/10 bg-cream-dark">
+                <img src={article.thumbnail_url} alt={article.judul} className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500 will-change-transform" loading="lazy" />
               </div>
             ) : (
-              <div className="aspect-[16/10] border-b-2 border-brand-dark bg-brand-yellow/15 flex items-center justify-center">
+              <div className="aspect-[16/10] border-b border-brand-dark/10 bg-brand-yellow/15 flex items-center justify-center">
                 <Newspaper className="w-12 h-12 text-brand-orange/40" />
               </div>
             )}
             
             <div className="p-6">
-              <span className={`inline-block px-3 py-1 rounded-full text-xs font-kids font-bold border-2 border-brand-dark mb-4 shadow-[1.5px_1.5px_0_#2A1B15] ${katColors[article.kategori] || 'bg-white text-brand-dark'}`}>
+              <span className={`inline-block px-3 py-1 rounded-full text-xs font-kids font-bold border border-brand-dark/15 mb-4 shadow-soft ${katColors[article.kategori] || 'bg-white text-brand-dark'}`}>
                 {article.kategori.toUpperCase()}
               </span>
               
@@ -134,7 +132,7 @@ function ArticleCard({ article, index }: { article: Article; index: number }) {
             </div>
           </div>
 
-          <div className="px-6 pb-6 pt-2 flex flex-col gap-2.5 font-kids font-bold text-xs text-brand-dark/75 border-t border-brand-dark/10">
+          <div className="px-6 pb-6 pt-2 flex flex-col gap-2.5 font-kids font-bold text-xs text-brand-dark/75 border-t border-brand-dark/5">
             <div className="flex items-center justify-between pt-2">
               <span className="flex items-center gap-1.5">
                 <User className="w-3.5 h-3.5 text-brand-orange shrink-0" />

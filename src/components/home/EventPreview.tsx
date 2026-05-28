@@ -28,7 +28,7 @@ export default function EventPreview() {
   }, []);
 
   return (
-    <section className="py-20 lg:py-28 bg-[#FAF6F0] relative border-t-2 border-b-2 border-brand-dark/10">
+    <section className="py-20 lg:py-28 bg-[#FAF6F0] relative border-t border-b border-brand-dark/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
           badge="Kegiatan Terbaru"
@@ -53,7 +53,7 @@ export default function EventPreview() {
         <div className="text-center mt-16">
           <Link
             to="/kegiatan"
-            className="px-8 py-4 bg-brand-orange text-white font-kids font-bold text-sm sm:text-base rounded-full border-2 border-brand-dark shadow-[4px_4px_0_#2A1B15] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all inline-flex items-center gap-2"
+            className="px-8 py-4 bg-brand-orange text-white font-kids font-bold text-sm sm:text-base rounded-full border border-brand-dark/10 shadow-soft hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md transition-all inline-flex items-center gap-2"
           >
             <span>Lihat Semua Kegiatan</span>
             <span>➔</span>
@@ -89,9 +89,9 @@ function EventCard({ event, index }: { event: Event; index: number }) {
       ref={ref}
       className={`animate-slide-up stagger-${index + 1} ${isVisible ? 'visible' : ''} flex`}
     >
-      <div className="bg-cream-card rounded-3xl border-4 border-brand-dark p-6 shadow-[6px_6px_0_#2A1B15] hover:-translate-y-1 transition-all flex flex-col justify-between w-full group">
+      <div className="bg-cream-card rounded-[2rem] border border-brand-dark/15 p-7 shadow-soft hover:shadow-soft-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between w-full group">
         <div>
-          <span className={`inline-block px-3 py-1 rounded-full text-xs font-kids font-bold border-2 border-brand-dark mb-4 shadow-[1.5px_1.5px_0_#2A1B15] ${jenisColors[event.jenis] || jenisColors.lainnya}`}>
+          <span className={`inline-block px-3 py-1 rounded-full text-xs font-kids font-bold border border-brand-dark/15 mb-4 shadow-soft ${jenisColors[event.jenis] || jenisColors.lainnya}`}>
             {event.jenis.toUpperCase()}
           </span>
           
@@ -128,8 +128,8 @@ function EventCard({ event, index }: { event: Event; index: number }) {
 
 function EmptyEvents() {
   return (
-    <div className="bg-white p-8 md:p-12 rounded-3xl border-4 border-brand-dark shadow-[6px_6px_0_#2A1B15] max-w-md mx-auto text-center space-y-4">
-      <div className="w-16 h-16 rounded-full bg-brand-yellow/10 border-2 border-brand-dark flex items-center justify-center mx-auto">
+    <div className="bg-white p-8 md:p-12 rounded-[2rem] border border-brand-dark/15 shadow-soft max-w-md mx-auto text-center space-y-4">
+      <div className="w-16 h-16 rounded-full bg-brand-yellow/10 border border-brand-dark/10 flex items-center justify-center mx-auto">
         <Compass className="w-8 h-8 text-brand-orange animate-spin-slow" />
       </div>
       <h3 className="font-serif text-xl font-bold text-brand-dark">Belum ada kegiatan terjadwal</h3>

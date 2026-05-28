@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import SectionHeading from '../components/shared/SectionHeading';
+import SubpageHeader from '../components/shared/SubpageHeader';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import { KATEGORI_MATERI } from '../data/constants';
 import type { Material } from '../types';
@@ -27,21 +28,17 @@ export default function MateriPage() {
   }, [activeFilter]);
 
   return (
-    <main className="pt-24 min-h-screen bg-cream-bg text-brand-dark">
-      {/* Hero Header */}
-      <section className="bg-brand-green py-16 lg:py-20 text-center border-b-4 border-brand-dark relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none select-none">
-          <div className="absolute top-5 left-10 text-4xl opacity-15">📚</div>
-          <div className="absolute bottom-5 right-10 text-4xl opacity-15">🏕️</div>
-        </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-kids font-bold uppercase bg-brand-yellow text-brand-dark border-2 border-brand-dark shadow-[2px_2px_0_rgba(0,0,0,0.15)] mb-4">
-            Eksplorasi Keilmuan
-          </span>
-          <h1 className="font-serif text-4xl sm:text-6xl font-black text-white tracking-tight mb-3">Materi Pramuka</h1>
-          <p className="text-[#FAF6F0] text-sm sm:text-lg max-w-xl mx-auto font-sans font-medium opacity-90">Pelajari berbagai keterampilan kepramukaan dari dasar hingga mahir.</p>
-        </div>
-      </section>
+    <main className="min-h-screen bg-cream-bg text-brand-dark">
+      <SubpageHeader
+        badge="Eksplorasi Keilmuan"
+        title="Materi Pramuka"
+        subtitle="Pelajari berbagai keterampilan kepramukaan dari dasar hingga mahir."
+        bgVariant="blue"
+        modelImage="/assets/model/Alysia Fasma Nidai No BG.webp"
+        modelName="Alysia"
+        modelAlign="right"
+        modelSize="large"
+      />
 
       <section className="py-16 lg:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -85,10 +82,10 @@ function FilterBtn({ label, value, active, onClick }: { label: string; value: st
   return (
     <button
       onClick={() => onClick(value)}
-      className={`px-4 py-1.5 text-xs sm:text-sm font-kids font-bold rounded-full border-2 transition-all cursor-pointer ${
+      className={`px-4 py-1.5 text-xs sm:text-sm font-kids font-bold rounded-full border transition-all cursor-pointer ${
         isActive
-          ? 'bg-brand-dark text-white border-brand-dark shadow-[2px_2px_0_rgba(0,0,0,0.15)]'
-          : 'bg-white text-brand-dark border-brand-dark/20 hover:border-brand-dark'
+          ? 'bg-brand-dark text-white border-brand-dark shadow-soft'
+          : 'bg-white text-brand-dark border-brand-dark/10 hover:border-brand-dark/20'
       }`}
     >
       {label}
@@ -107,14 +104,14 @@ function MateriCard({ material, index }: { material: Material; index: number }) 
 
   return (
     <div ref={ref} className={`animate-slide-up stagger-${(index % 3) + 1} ${isVisible ? 'visible' : ''} flex`}>
-      <div className="bg-cream-card rounded-3xl border-4 border-brand-dark overflow-hidden shadow-[6px_6px_0_#2A1B15] flex flex-col justify-between w-full hover:-translate-y-1 transition-all group">
+      <div className="bg-cream-card rounded-[2rem] border border-brand-dark/15 overflow-hidden shadow-soft hover:shadow-soft-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between w-full group">
         <div>
           {material.thumbnail_url ? (
-            <div className="h-44 overflow-hidden border-b-2 border-brand-dark relative bg-cream-dark">
+            <div className="h-44 overflow-hidden border-b border-brand-dark/10 relative bg-cream-dark">
               <img src={material.thumbnail_url} alt={material.judul} className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500" loading="lazy" />
             </div>
           ) : (
-            <div className="h-44 border-b-2 border-brand-dark bg-brand-yellow/15 flex items-center justify-center relative">
+            <div className="h-44 border-b border-brand-dark/10 bg-brand-yellow/15 flex items-center justify-center relative">
               <BookOpen className="w-12 h-12 text-brand-orange/40" />
             </div>
           )}
@@ -147,7 +144,7 @@ function MateriCard({ material, index }: { material: Material; index: number }) 
               href={material.file_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full py-2.5 px-4 rounded-xl text-xs font-kids font-bold uppercase tracking-wider text-center border-2 border-brand-dark bg-white text-brand-dark shadow-[2px_2px_0_rgba(42,27,21,1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] hover:bg-brand-yellow/10 transition-all flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 rounded-full text-xs font-kids font-bold uppercase tracking-wider text-center border border-brand-dark/15 bg-white text-brand-dark shadow-soft hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Unduh Materi</span>

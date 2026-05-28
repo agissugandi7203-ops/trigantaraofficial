@@ -31,7 +31,7 @@ export default function GalleryPreview() {
   const hasData = items.length > 0;
 
   return (
-    <section className="py-20 lg:py-28 bg-cream-bg relative border-t-2 border-b-2 border-brand-dark/10">
+    <section className="py-20 lg:py-28 bg-cream-bg relative border-t border-b border-brand-dark/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
           badge="Galeri Momen"
@@ -60,7 +60,7 @@ export default function GalleryPreview() {
         <div className="text-center mt-16">
           <Link
             to="/galeri"
-            className="px-8 py-4 bg-brand-green text-white font-kids font-bold text-sm sm:text-base rounded-full border-2 border-brand-dark shadow-[4px_4px_0_#2A1B15] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all inline-flex items-center gap-2"
+            className="px-8 py-4 bg-brand-green text-white font-kids font-bold text-sm sm:text-base rounded-full border border-brand-dark/10 shadow-soft hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md transition-all inline-flex items-center gap-2"
           >
             <span>Buka Galeri Foto Lengkap</span>
             <span>➔</span>
@@ -79,16 +79,16 @@ function GalleryCard({ item, index }: { item: GalleryItem; index: number }) {
       ref={ref}
       className={`animate-scale-in stagger-${index + 1} ${isVisible ? 'visible' : ''} flex`}
     >
-      <div className="group relative overflow-hidden rounded-3xl border-4 border-brand-dark aspect-[4/3] bg-cream-dark w-full shadow-[4px_4px_0_#2A1B15] cursor-pointer">
+      <div className="group relative overflow-hidden rounded-[2rem] border border-brand-dark/15 aspect-[4/3] bg-cream-dark w-full shadow-soft hover:shadow-soft-lg cursor-pointer transition-[transform,box-shadow] duration-300">
         <img
           src={item.foto_url}
           alt={item.judul}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 will-change-transform"
           loading="lazy"
         />
         
         {/* Floating details box on hover */}
-        <div className="absolute bottom-3 left-3 right-3 bg-white border-2 border-brand-dark rounded-2xl p-3 shadow-[3px_3px_0_#2A1B15] transform translate-y-[120%] group-hover:translate-y-0 transition-transform duration-300 pointer-events-none">
+        <div className="absolute bottom-3 left-3 right-3 bg-white border border-brand-dark/10 rounded-2xl p-3 shadow-soft transform translate-y-[120%] group-hover:translate-y-0 transition-transform duration-300 pointer-events-none">
           <p className="text-brand-dark font-kids font-bold text-xs sm:text-sm line-clamp-1">{item.judul}</p>
           {item.kategori && (
             <p className="text-brand-orange font-kids font-bold text-[10px] uppercase mt-0.5">{item.kategori}</p>
@@ -107,14 +107,14 @@ function FallbackCard({ image, index }: { image: typeof FALLBACK_IMAGES[0]; inde
       ref={ref}
       className={`animate-scale-in stagger-${index + 1} ${isVisible ? 'visible' : ''} flex`}
     >
-      <div className="group bg-white rounded-3xl border-4 border-brand-dark overflow-hidden w-full shadow-[6px_6px_0_#2A1B15] flex flex-col">
-        <div className="h-64 overflow-hidden border-b-4 border-brand-dark bg-cream-dark relative">
+      <div className="group bg-white rounded-[2rem] border border-brand-dark/15 overflow-hidden w-full shadow-soft hover:shadow-soft-lg transition-[transform,box-shadow] duration-300 flex flex-col">
+        <div className="h-64 overflow-hidden border-b border-brand-dark/10 bg-cream-dark relative">
           <img
             src={image.url}
             alt={image.title}
-            className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500 will-change-transform"
           />
-          <div className="absolute top-3 left-3 bg-brand-yellow text-brand-dark border-2 border-brand-dark px-3 py-1 rounded-full text-xs font-kids font-bold">
+          <div className="absolute top-3 left-3 bg-brand-yellow text-brand-dark border border-brand-dark/10 shadow-soft px-3 py-1 rounded-full text-xs font-kids font-bold">
             Dokumentasi Gudep
           </div>
         </div>
