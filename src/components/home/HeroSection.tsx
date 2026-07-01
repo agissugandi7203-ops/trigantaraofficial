@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { Compass, Flame, ArrowUpRight, Check, Star, Target, MapPin, Globe2 } from 'lucide-react';
@@ -6,7 +6,6 @@ import { HERO_STATS } from '../../data/constants';
  
 export default function HeroSection() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoOpacity, setVideoOpacity] = useState(0);
  
   useEffect(() => {
     const video = videoRef.current;
@@ -24,19 +23,18 @@ export default function HeroSection() {
       if (video.duration) {
         const currentTime = video.currentTime;
         const duration = video.duration;
+        let opacity = 1;
  
         // Fade in over 0.5s at the start (opacity 0 to 1)
         if (currentTime < 0.5) {
-          setVideoOpacity(currentTime / 0.5);
+          opacity = currentTime / 0.5;
         }
         // Fade out over 0.5s before the end (opacity 1 to 0)
         else if (duration - currentTime < 0.5) {
-          setVideoOpacity((duration - currentTime) / 0.5);
+          opacity = (duration - currentTime) / 0.5;
         }
-        // Full opacity in the middle
-        else {
-          setVideoOpacity(1);
-        }
+ 
+        video.style.opacity = String(opacity);
       }
       animationFrameId = requestAnimationFrame(checkTime);
     };
@@ -44,7 +42,7 @@ export default function HeroSection() {
     animationFrameId = requestAnimationFrame(checkTime);
  
     const handleEnded = () => {
-      setVideoOpacity(0);
+      video.style.opacity = "0";
       // Wait 100ms, reset currentTime = 0, then play() again
       setTimeout(() => {
         if (videoRef.current) {
@@ -229,8 +227,8 @@ export default function HeroSection() {
           playsInline
           autoPlay
           loop
-          className="w-full h-full object-cover object-top"
-          style={{ opacity: videoOpacity }}
+          className="w-full h-full object-cover object-top transition-opacity duration-300"
+          style={{ opacity: 0 }}
         />
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-cream-bg via-transparent to-cream-bg pointer-events-none z-10" />
