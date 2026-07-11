@@ -5,7 +5,7 @@ const MEMBERS = [
   {
     nama: 'Fahri Anggay',
     jabatan: 'Pradana Putra',
-    image: '/assets/model/FAHRI Anggay No BG.png',
+    image: '/assets/model/FAHRI Anggay No BG.webp',
     blobColor: '#FF6E31', // Orange
     blobClass: 'rounded-[110px_90px_120px_80px]',
     icon: '⚜️',
@@ -13,7 +13,7 @@ const MEMBERS = [
   {
     nama: 'Nazwa',
     jabatan: 'Pradana Putri',
-    image: '/assets/model/nazwa.png',
+    image: '/assets/model/nazwa.webp',
     blobColor: '#29AC60', // Green
     blobClass: 'rounded-[90px_120px_85px_110px]',
     icon: '⭐',
@@ -21,7 +21,7 @@ const MEMBERS = [
   {
     nama: 'Kaisya',
     jabatan: 'Pemangku Adat Putri',
-    image: '/assets/model/kaisya.png',
+    image: '/assets/model/kaisya.webp',
     blobColor: '#FFCE3B', // Yellow
     blobClass: 'rounded-[120px_85px_110px_90px]',
     icon: '❤️',
@@ -29,7 +29,7 @@ const MEMBERS = [
   {
     nama: 'Intan Nur Hayati',
     jabatan: 'Bendahara Ambalan',
-    image: '/assets/model/Intan Nur Hayati No BG.png',
+    image: '/assets/model/Intan Nur Hayati No BG.webp',
     blobColor: '#3482F6', // Blue
     blobClass: 'rounded-[85px_110px_90px_120px]',
     icon: '📋',

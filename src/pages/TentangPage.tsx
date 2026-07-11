@@ -248,7 +248,7 @@ function PembinaSection() {
                     
                     {/* Character image */}
                     <img
-                      src={isPutra ? '/assets/model/FAHRI Anggay No BG.png' : '/assets/model/afika.webp'}
+                      src={isPutra ? '/assets/model/FAHRI Anggay No BG.webp' : '/assets/model/afika.webp'}
                       alt={pembina.nama}
                       className="absolute bottom-0 w-[380%] h-[380px] left-[-140%] right-[-140%] mx-auto z-10 max-w-none object-contain object-bottom select-none pointer-events-none transition-transform duration-300 group-hover:scale-[1.03]"
                     />

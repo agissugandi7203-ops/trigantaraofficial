@@ -29,7 +29,7 @@ const programDetails = [
     textClass: "text-brand-dark",
     badgeStyle: "bg-white text-brand-dark border-brand-dark",
     btnStyle: "bg-brand-dark text-white",
-    image: "/assets/model/Alysia Fasma Nidai No BG.png",
+    image: "/assets/model/Alysia Fasma Nidai No BG.webp",
     link: "/tentang"
   }
 ];

@@ -10,83 +10,77 @@ export default function HeroSection() {
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
- 
-    // Explicitly configure video properties for autoplay and smooth preloading
+
     video.muted = true;
     video.playsInline = true;
     video.preload = "auto";
+    video.loop = false;
     video.play().catch(err => console.log("Initial video play error:", err));
- 
+
     let animationFrameId: number;
- 
+    let direction: 'forward' | 'backward' = 'forward';
+    let lastTime = performance.now();
+
     const checkTime = () => {
+      const now = performance.now();
+      const delta = (now - lastTime) / 1000;
+      lastTime = now;
+
       if (video.duration) {
         const currentTime = video.currentTime;
         const duration = video.duration;
+
         let opacity = 1;
- 
-        // Fade in over 0.5s at the start (opacity 0 to 1)
         if (currentTime < 0.5) {
           opacity = currentTime / 0.5;
-        }
-        // Fade out over 0.5s before the end (opacity 1 to 0)
-        else if (duration - currentTime < 0.5) {
+        } else if (duration - currentTime < 0.5) {
           opacity = (duration - currentTime) / 0.5;
         }
- 
         video.style.opacity = String(opacity);
+
+        if (direction === 'forward') {
+          if (currentTime >= duration - 0.2) {
+            direction = 'backward';
+            video.pause();
+          }
+        } else {
+          const targetTime = currentTime - delta;
+          if (targetTime <= 0.2) {
+            direction = 'forward';
+            video.currentTime = 0.2;
+            video.play().catch(err => console.log("Video rewind transition play error:", err));
+          } else {
+            video.currentTime = targetTime;
+          }
+        }
       }
       animationFrameId = requestAnimationFrame(checkTime);
     };
- 
+
     animationFrameId = requestAnimationFrame(checkTime);
- 
-    const handleEnded = () => {
-      video.style.opacity = "0";
-      // Wait 100ms, reset currentTime = 0, then play() again
-      setTimeout(() => {
-        if (videoRef.current) {
-          videoRef.current.currentTime = 0;
-          videoRef.current.play().catch(err => console.log("Video ended reset error:", err));
-        }
-      }, 100);
-    };
- 
-    video.addEventListener('ended', handleEnded);
- 
+
     return () => {
       cancelAnimationFrame(animationFrameId);
-      video.removeEventListener('ended', handleEnded);
+      if (video) {
+        video.pause();
+      }
     };
   }, []);
  
   return (
-    <section id="hero" className="relative py-12 md:py-24 overflow-hidden bg-cream-bg text-brand-dark pt-32">
-      {/* Floating elements from the original site layout style */}
-      <div className="absolute top-24 left-[8%] select-none z-10 pointer-events-none text-brand-orange hidden sm:block">
-        <div className="relative group p-3 bg-white border border-brand-dark/10 rounded-2xl shadow-soft animate-float-slow">
-          <Compass className="w-8 h-8" />
-        </div>
-      </div>
- 
-      <div className="absolute top-24 right-[12%] select-none z-10 pointer-events-none text-brand-green hidden sm:block">
-        <div className="p-3 bg-white border border-brand-dark/10 rounded-full shadow-soft animate-float-delayed">
-          <Flame className="w-8 h-8" />
-        </div>
-      </div>
- 
+    <section id="hero" className="relative pt-24 pb-4 md:pt-28 md:pb-6 overflow-hidden bg-cream-bg text-brand-dark">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
-        <div className="text-center max-w-4xl mx-auto space-y-6">
-          <h1 className="font-serif text-5xl md:text-7xl font-bold leading-[1.1] tracking-tight max-w-3xl mx-auto pt-8">
+        <div className="text-center max-w-4xl mx-auto space-y-4">
+          <h1 className="font-serif text-5xl md:text-7xl font-bold leading-[1.1] tracking-tight max-w-3xl mx-auto pt-4">
             Siapkan Generasi <span className="text-brand-orange italic">Tangguh</span> Bersama Trigantara
           </h1>
 
-          <p className="text-brand-dark/70 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-            Selamat datang di website resmi Pramuka SMK Marhas Margahayu. Bersama Gugus Depan Trigantara, kami membina kepramukaan modern yang membentuk karakter tangguh, mandiri, dan berprestasi.
+          <p className="text-brand-dark/70 text-base md:text-lg max-w-xl mx-auto leading-relaxed">
+            Website resmi Pramuka SMK Marhas Margahayu (Gugus Depan Trigantara). Kami membina kepramukaan modern yang tangguh, mandiri, dan berprestasi.
           </p>
- 
+
           {/* Hero CTA buttons */}
-          <div className="pt-4 flex flex-wrap justify-center gap-4">
+          <div className="pt-2 flex flex-wrap justify-center gap-4">
             <Link
               to="/gabung"
               id="hero-start-learning-btn"
@@ -105,7 +99,7 @@ export default function HeroSection() {
         </div>
  
         {/* Kids visual portrait rows and middle doodle */}
-        <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-12 mt-16 md:mt-24 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-8 mt-6 md:mt-10 max-w-6xl mx-auto">
           
           {/* Left Model Container with Pop-out 3D Effect */}
           <div className="relative flex justify-center">
@@ -123,7 +117,7 @@ export default function HeroSection() {
               
               {/* Large overlapping image */}
               <img 
-                src="/assets/model/nazwa.png"
+                src="/assets/model/nazwa.webp"
                 alt="Nazwa Anggota Pramuka"
                 className="absolute bottom-0 left-[-100%] right-[-100%] mx-auto z-10 w-[384%] h-[1050px] max-w-none object-contain object-bottom transform translate-x-[-140px] select-none pointer-events-none"
               />
@@ -176,7 +170,7 @@ export default function HeroSection() {
               
               {/* Large overlapping image */}
               <img 
-                src="/assets/model/Intan Nur Hayati No BG.png"
+                src="/assets/model/Intan Nur Hayati No BG.webp"
                 alt="Intan Nur Hayati"
                 className="absolute bottom-0 left-[-100%] right-[-100%] mx-auto z-10 w-[384%] h-[1050px] max-w-none object-contain object-bottom transform translate-x-[-160px] select-none pointer-events-none"
               />
@@ -222,7 +216,7 @@ export default function HeroSection() {
  
       {/* Video Background */}
       <div 
-        className="absolute inset-x-0 top-0 h-[550px] md:h-full pointer-events-none overflow-hidden select-none z-0" 
+        className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0" 
       >
         <video
           ref={videoRef}
