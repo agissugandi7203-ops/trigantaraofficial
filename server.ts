@@ -14,23 +14,23 @@ console.log('[BOOT] Starting Trigantara server...');
 console.log('[BOOT] NODE_ENV =', process.env.NODE_ENV);
 console.log('[BOOT] PORT =', process.env.PORT);
 
+import dotenv from 'dotenv';
+import fs from 'fs';
+
 // Load dotenv ONLY in dev (in production, env vars are injected by Cloud Run)
 if (process.env.NODE_ENV !== 'production') {
-  try {
-    const dotenv = require('dotenv');
-    dotenv.config();
-    console.log('[BOOT] dotenv loaded for development');
-  } catch {
-    console.log('[BOOT] dotenv not available, skipping');
-  }
+  dotenv.config();
+  console.log('[BOOT] dotenv loaded for development');
 }
 
 import express from 'express';
-import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { createClient } from '@supabase/supabase-js';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import archiver from 'archiver';
+import { Readable } from 'stream';
 
 console.log('[BOOT] Modules imported successfully');
 
@@ -92,13 +92,18 @@ async function verifyAdmin(
   res: express.Response,
   next: express.NextFunction
 ) {
+  let token = '';
   const authHeader = req.headers.authorization;
-  if (!authHeader?.startsWith('Bearer ')) {
+  if (authHeader?.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
+  } else if (req.query.token) {
+    token = req.query.token as string;
+  }
+
+  if (!token) {
     res.status(401).json({ error: 'Token tidak ditemukan. Silakan login.' });
     return;
   }
-
-  const token = authHeader.split(' ')[1];
 
   if (!supabaseAdmin) {
     res.status(500).json({ error: 'Supabase belum dikonfigurasi.' });
@@ -108,6 +113,7 @@ async function verifyAdmin(
   try {
     const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
     if (error || !user) {
+      console.error('[verifyAdmin] auth.getUser failed. Token:', token ? (token.substring(0, 15) + '...') : token, 'Error:', error);
       res.status(401).json({ error: 'Token tidak valid atau kedaluwarsa.' });
       return;
     }
@@ -115,7 +121,8 @@ async function verifyAdmin(
     // Attach user to request for downstream handlers
     (req as any).user = user;
     next();
-  } catch {
+  } catch (err) {
+    console.error('[verifyAdmin] Exception caught:', err);
     res.status(401).json({ error: 'Gagal memverifikasi token.' });
   }
 }
@@ -224,8 +231,10 @@ app.post('/api/admin/upload-url', verifyAdmin, async (req, res) => {
     return;
   }
 
+  const cleanFolder = folder.split('/').filter(Boolean).join('/');
   const ext = filename.split('.').pop() || 'bin';
-  const key = `${folder}/${Date.now()}-${uuidv4().slice(0, 8)}.${ext}`;
+  const fileId = `${Date.now()}-${uuidv4().slice(0, 8)}.${ext}`;
+  const key = cleanFolder ? `${cleanFolder}/${fileId}` : fileId;
 
   try {
     const command = new PutObjectCommand({
@@ -244,6 +253,261 @@ app.post('/api/admin/upload-url', verifyAdmin, async (req, res) => {
   }
 });
 
+// R2 Storage Management — Proxy upload (bypasses browser CORS)
+app.post(
+  '/api/admin/r2/upload-proxy',
+  verifyAdmin,
+  express.raw({ type: '*/*', limit: '15mb' }),
+  async (req, res) => {
+    if (!s3Client || !R2_BUCKET_NAME) {
+      res.status(500).json({ error: 'R2 belum dikonfigurasi.' });
+      return;
+    }
+
+    const filename = req.query.filename as string;
+    const contentType = req.query.contentType as string;
+    const folder = (req.query.folder as string) || 'uploads';
+
+    if (!filename || !contentType) {
+      res.status(400).json({ error: 'Query parameters filename dan contentType wajib diisi.' });
+      return;
+    }
+
+    if (!req.body || !(req.body instanceof Buffer)) {
+      res.status(400).json({ error: 'Data file tidak valid.' });
+      return;
+    }
+
+    const cleanFolder = folder.split('/').filter(Boolean).join('/');
+    const ext = filename.split('.').pop() || 'bin';
+    const fileId = `${Date.now()}-${uuidv4().slice(0, 8)}.${ext}`;
+    const key = cleanFolder ? `${cleanFolder}/${fileId}` : fileId;
+
+    try {
+      const command = new PutObjectCommand({
+        Bucket: R2_BUCKET_NAME,
+        Key: key,
+        ContentType: contentType,
+        Body: req.body,
+      });
+
+      await s3Client.send(command);
+      clearR2Cache();
+
+      const publicUrl = R2_PUBLIC_URL ? `${R2_PUBLIC_URL}/${key}` : key;
+      res.json({ success: true, publicUrl, key });
+    } catch (err) {
+      console.error('[R2 Proxy Upload] Error:', err);
+      res.status(500).json({ error: 'Gagal mengunggah file ke R2 melalui proxy.' });
+    }
+  }
+);
+
+// R2 Storage Management — Download file (proxied to avoid CORS and force direct attachment download)
+app.get('/api/admin/r2/download', verifyAdmin, async (req, res) => {
+  if (!s3Client || !R2_BUCKET_NAME) {
+    res.status(500).json({ error: 'R2 belum dikonfigurasi.' });
+    return;
+  }
+  const key = req.query.key as string;
+  if (!key) {
+    res.status(400).json({ error: 'Key file wajib diisi.' });
+    return;
+  }
+
+  try {
+    const command = new GetObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: key,
+    });
+    const result = await s3Client.send(command);
+
+    const filename = key.split('/').pop() || 'file';
+    // Force browser to download as attachment instead of inline view
+    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(filename)}"`);
+    res.setHeader('Content-Type', result.ContentType || 'application/octet-stream');
+
+    if (result.Body) {
+      (result.Body as any).pipe(res);
+    } else {
+      res.status(404).json({ error: 'File kosong.' });
+    }
+  } catch (err) {
+    console.error('[R2 Download Proxy] Error:', err);
+    res.status(500).json({ error: 'Gagal mengunduh file dari R2.' });
+  }
+});
+
+// Helper to recursively fetch all file keys under a folder prefix in R2
+async function listAllKeys(prefix: string): Promise<string[]> {
+  let keys: string[] = [];
+  let continuationToken: string | undefined;
+
+  do {
+    const response = await s3Client.send(
+      new ListObjectsV2Command({
+        Bucket: R2_BUCKET_NAME,
+        Prefix: prefix,
+        ContinuationToken: continuationToken,
+      })
+    );
+
+    if (response.Contents) {
+      for (const obj of response.Contents) {
+        // Exclude the folder placeholder itself (which ends with '/')
+        if (obj.Key && !obj.Key.endsWith('/')) {
+          keys.push(obj.Key);
+        }
+      }
+    }
+    continuationToken = response.NextContinuationToken;
+  } while (continuationToken);
+
+  return keys;
+}
+
+// Helper to get file from R2 and append it to archiver stream
+function appendStreamToZip(
+  archive: archiver.Archiver,
+  key: string,
+  basePrefix: string
+): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      const response = await s3Client.send(
+        new GetObjectCommand({
+          Bucket: R2_BUCKET_NAME,
+          Key: key,
+        })
+      );
+
+      if (!response.Body) {
+        reject(new Error(`File ${key} kosong atau tidak ditemukan.`));
+        return;
+      }
+
+      const r2Stream = response.Body as Readable;
+
+      // Extract the relative path within the ZIP.
+      const relativePath = key.startsWith(basePrefix)
+        ? key.substring(basePrefix.length)
+        : key.split('/').pop() || key;
+
+      r2Stream.on('error', (err) => {
+        reject(err);
+      });
+
+      archive.append(r2Stream, { name: relativePath }, (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
+// R2 Storage Management — Download folder or multiple files as ZIP
+app.get('/api/admin/r2/download-zip', verifyAdmin, async (req, res) => {
+  if (!s3Client || !R2_BUCKET_NAME) {
+    res.status(500).json({ error: 'R2 belum dikonfigurasi.' });
+    return;
+  }
+
+  const keysParam = req.query.keys as string;
+  const basePrefix = (req.query.basePrefix as string) || '';
+  
+  if (!keysParam) {
+    res.status(400).json({ error: 'Parameter keys wajib diisi.' });
+    return;
+  }
+
+  let selectedKeys: string[] = [];
+  try {
+    selectedKeys = JSON.parse(keysParam);
+    if (!Array.isArray(selectedKeys)) {
+      selectedKeys = [keysParam];
+    }
+  } catch {
+    selectedKeys = [keysParam];
+  }
+
+  if (selectedKeys.length === 0) {
+    res.status(400).json({ error: 'Daftar keys tidak boleh kosong.' });
+    return;
+  }
+
+  // Set ZIP headers
+  const zipName = `trigantara-download-${Date.now()}.zip`;
+  res.writeHead(200, {
+    'Content-Type': 'application/zip',
+    'Content-Disposition': `attachment; filename="${encodeURIComponent(zipName)}"`,
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+  });
+
+  const archive = archiver('zip', {
+    zlib: { level: 1 }, // FAST compression
+    forceZip64: true,   // ZIP64 support
+  });
+
+  archive.pipe(res);
+
+  let isCancelled = false;
+  res.on('close', () => {
+    isCancelled = true;
+    console.log('[R2 Zip Download] Koneksi dibatalkan oleh client.');
+  });
+
+  archive.on('error', (err) => {
+    console.error('[R2 Zip Download] Archive stream error:', err);
+    res.destroy(err);
+  });
+
+  try {
+    for (const key of selectedKeys) {
+      if (isCancelled) break;
+
+      if (key.endsWith('/')) {
+        // Virtual Directory: List recursively
+        const fileKeys = await listAllKeys(key);
+        for (const fKey of fileKeys) {
+          if (isCancelled) break;
+          await appendStreamToZip(archive, fKey, basePrefix);
+        }
+      } else {
+        // Individual File
+        await appendStreamToZip(archive, key, basePrefix);
+      }
+    }
+
+    if (!isCancelled) {
+      await archive.finalize();
+    }
+  } catch (err) {
+    console.error('[R2 Zip Download] Proses zip gagal:', err);
+    archive.abort();
+    res.destroy(err as Error);
+  }
+});
+
+// ============================================
+// R2 Cache Configuration
+// ============================================
+interface CachedR2List {
+  folders: any[];
+  files: any[];
+  prefix: string;
+}
+const r2ListCache = new Map<string, { data: CachedR2List; timestamp: number }>();
+const CACHE_TTL_MS = 30000; // Cache for 30 seconds
+
+function clearR2Cache() {
+  r2ListCache.clear();
+  console.log('[R2 Cache] Cache cleared due to write operation');
+}
+
 // R2 Storage Management — List objects
 app.get('/api/admin/r2/list', verifyAdmin, async (req, res) => {
   if (!s3Client || !R2_BUCKET_NAME) {
@@ -251,6 +515,18 @@ app.get('/api/admin/r2/list', verifyAdmin, async (req, res) => {
     return;
   }
   const prefix = (req.query.prefix as string) || '';
+  const refresh = req.query.refresh === 'true';
+
+  // Check cache first if not forcing refresh
+  if (!refresh) {
+    const cached = r2ListCache.get(prefix);
+    if (cached && (Date.now() - cached.timestamp < CACHE_TTL_MS)) {
+      console.log(`[R2 Cache] Cache hit for prefix: "${prefix}"`);
+      res.json(cached.data);
+      return;
+    }
+  }
+
   try {
     const command = new ListObjectsV2Command({
       Bucket: R2_BUCKET_NAME,
@@ -277,7 +553,9 @@ app.get('/api/admin/r2/list', verifyAdmin, async (req, res) => {
         url: R2_PUBLIC_URL ? `${R2_PUBLIC_URL}/${obj.Key}` : obj.Key,
       }));
     
-    res.json({ folders, files, prefix });
+    const responseData = { folders, files, prefix };
+    r2ListCache.set(prefix, { data: responseData, timestamp: Date.now() });
+    res.json(responseData);
   } catch (err) {
     console.error('[R2] List error:', err);
     res.status(500).json({ error: 'Gagal mengambil daftar file R2.' });
@@ -300,6 +578,7 @@ app.delete('/api/admin/r2/delete', verifyAdmin, async (req, res) => {
       Bucket: R2_BUCKET_NAME,
       Key: key,
     }));
+    clearR2Cache();
     res.json({ success: true, message: `File "${key}" berhasil dihapus.` });
   } catch (err) {
     console.error('[R2] Delete error:', err);
@@ -318,7 +597,9 @@ app.post('/api/admin/r2/create-folder', verifyAdmin, async (req, res) => {
     res.status(400).json({ error: 'Nama folder wajib diisi.' });
     return;
   }
-  const key = `${parentPrefix}${folderName}/`;
+  const cleanParent = parentPrefix.split('/').filter(Boolean).join('/');
+  const cleanFolder = folderName.split('/').filter(Boolean).join('/');
+  const key = cleanParent ? `${cleanParent}/${cleanFolder}/` : `${cleanFolder}/`;
   try {
     await s3Client.send(new PutObjectCommand({
       Bucket: R2_BUCKET_NAME,
@@ -326,6 +607,7 @@ app.post('/api/admin/r2/create-folder', verifyAdmin, async (req, res) => {
       ContentLength: 0,
       Body: '',
     }));
+    clearR2Cache();
     res.json({ success: true, key, message: `Folder "${folderName}" berhasil dibuat.` });
   } catch (err) {
     console.error('[R2] Create folder error:', err);
@@ -484,7 +766,6 @@ async function startServer() {
       app.use('/public', express.static(path.resolve(process.cwd(), 'public')));
 
       // SPA fallback: serve index.html for all non-API routes
-      const fs = require('fs');
       app.get('*', (req, res) => {
         if (req.path.startsWith('/api/')) {
           res.status(404).json({ error: 'API endpoint not found' });

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { motion } from 'motion/react';
@@ -12,10 +12,11 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   // Redirect if already logged in
-  if (isAdmin) {
-    navigate('/admin', { replace: true });
-    return null;
-  }
+  useEffect(() => {
+    if (isAdmin) {
+      navigate('/admin', { replace: true });
+    }
+  }, [isAdmin, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

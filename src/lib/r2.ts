@@ -57,14 +57,11 @@ export async function uploadFileToR2(
   folder: string = 'uploads',
   onProgress?: (percent: number) => void
 ): Promise<string> {
-  // Step 1: Get presigned URL
-  const { uploadUrl, publicUrl } = await getUploadUrl(
-    file.name,
-    file.type,
-    folder
-  );
+  const token = localStorage.getItem('trigantara_admin_token');
+  if (!token) {
+    throw new Error('Anda harus login sebagai admin untuk upload file.');
+  }
 
-  // Step 2: Upload directly to R2
   const xhr = new XMLHttpRequest();
   
   return new Promise((resolve, reject) => {
@@ -76,9 +73,19 @@ export async function uploadFileToR2(
 
     xhr.addEventListener('load', () => {
       if (xhr.status >= 200 && xhr.status < 300) {
-        resolve(publicUrl);
+        try {
+          const res = JSON.parse(xhr.responseText);
+          resolve(res.publicUrl);
+        } catch {
+          reject(new Error('Gagal mengurai respons server.'));
+        }
       } else {
-        reject(new Error(`Upload ke R2 gagal: ${xhr.status}`));
+        try {
+          const err = JSON.parse(xhr.responseText);
+          reject(new Error(err.error || `Upload gagal: ${xhr.status}`));
+        } catch {
+          reject(new Error(`Upload gagal: ${xhr.status}`));
+        }
       }
     });
 
@@ -86,7 +93,9 @@ export async function uploadFileToR2(
       reject(new Error('Koneksi gagal saat upload file.'));
     });
 
-    xhr.open('PUT', uploadUrl);
+    const url = `/api/admin/r2/upload-proxy?filename=${encodeURIComponent(file.name)}&contentType=${encodeURIComponent(file.type)}&folder=${encodeURIComponent(folder)}`;
+    xhr.open('POST', url);
+    xhr.setRequestHeader('Authorization', `Bearer ${token}`);
     xhr.setRequestHeader('Content-Type', file.type);
     xhr.send(file);
   });

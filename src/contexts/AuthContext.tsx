@@ -56,8 +56,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
-    localStorage.removeItem('trigantara_admin_token');
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.error('Error during signOut:', err);
+    } finally {
+      localStorage.removeItem('trigantara_admin_token');
+      setSession(null);
+      setUser(null);
+    }
   };
 
   return (
