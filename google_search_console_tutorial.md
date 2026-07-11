@@ -105,3 +105,38 @@ Jika Anda baru saja mempublikasikan artikel blog baru atau halaman baru dan ingi
   * Ini adalah bug visual yang sangat umum terjadi pada sitemap baru di GSC. Jangan panik. Cukup pastikan Anda dapat membuka `https://trigantara.web.id/sitemap.xml` di browser Anda dengan lancar. Jika bisa terbuka, biarkan saja, Google akan mengambilnya secara otomatis dalam waktu 24-48 jam.
 * **Perubahan Tidak Terdeteksi saat Verifikasi Meta Tag:**
   * Pastikan Anda sudah mem-build dan men-deploy proyek React Anda ke server produksi. Jika server Anda menggunakan caching (seperti Cloudflare cache), lakukan *purge cache* terlebih dahulu agar Google mendapat versi `index.html` terbaru yang telah disisipkan tag verifikasi Anda.
+
+---
+
+## 🌐 Cara Membuat & Menggunakan Subdomain (Gratis!)
+Banyak orang mengira untuk mendapatkan subdomain (seperti `admin.trigantara.web.id` atau `blog.trigantara.web.id`) mereka harus membelinya kembali. Jawabannya adalah **TIDAK**. 
+
+Karena Anda sudah memiliki domain utama **`trigantara.web.id`**, Anda bisa membuat subdomain sebanyak apa pun secara **100% GRATIS** langsung melalui DNS Management (seperti Cloudflare atau Domain Registrar tempat Anda membeli domain).
+
+### Langkah-Langkah Membuat Subdomain:
+
+1. **Masuk ke DNS Manager:**
+   * Login ke dashboard **Cloudflare** (jika menggunakan Cloudflare) atau masuk ke portal klien domain registrar Anda (seperti Niagahoster, Namecheap, dll.) dan pilih menu **DNS Zone Editor**.
+2. **Tambahkan DNS Record Baru:**
+   * Klik tombol **Add Record** (Tambah Record).
+   * Isi kolom konfigurasi sebagai berikut:
+     * **Type:** Pilih `A` (jika mengarahkan ke IP server VPS) atau `CNAME` (jika mengarahkan ke domain hosting lain seperti Vercel, Netlify, Github Pages, dll.).
+     * **Name / Host:** Masukkan nama subdomain yang diinginkan.
+       * Contoh: Jika ingin membuat `admin.trigantara.web.id`, cukup ketik **`admin`**.
+       * Contoh: Jika ingin membuat `blog.trigantara.web.id`, cukup ketik **`blog`**.
+     * **Target / IP Address / Value:** Masukkan IP VPS Anda (untuk tipe `A`) atau target domain hosting (untuk tipe `CNAME`, misalnya `cname.vercel-dns.com`).
+     * **Proxy Status (Khusus Cloudflare):** Aktifkan (Proxied / Awan Oranye) untuk keamanan tambahan, atau matikan (DNS Only) tergantung kebutuhan hosting Anda.
+3. **Simpan:** Klik **Save** / **Simpan**. Subdomain Anda kini sudah aktif di sisi DNS!
+
+---
+
+## 🔍 Cara Mendaftarkan Subdomain di Google Search Console
+
+Bagaimana agar Google mengenali subdomain baru Anda? Ada dua cara tergantung metode verifikasi awal yang Anda gunakan:
+
+1. **Jika Anda Menggunakan Tipe Properti DOMAIN (`trigantara.web.id`):**
+   * **Otomatis Aman!** Anda tidak perlu menambahkan apa-apa lagi di Google Search Console. Properti tipe Domain secara otomatis memantau, mendeteksi, dan mengindeks semua subdomain (misal: `admin.trigantara.web.id`, `blog.trigantara.web.id`, `www.trigantara.web.id`) secara otomatis di bawah satu properti yang sama.
+2. **Jika Anda Menggunakan Tipe AWALAN URL (`URL Prefix`):**
+   * Anda harus menambahkan properti baru untuk subdomain tersebut.
+   * Klik **Tambahkan Properti**, pilih **Awalan URL**, masukkan URL subdomain lengkapnya (misalnya: `https://admin.trigantara.web.id`), lalu lakukan verifikasi ulang seperti pada Step 2.
+
