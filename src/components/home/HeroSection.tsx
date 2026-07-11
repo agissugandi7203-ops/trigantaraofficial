@@ -216,7 +216,7 @@ export default function HeroSection() {
  
       {/* Video Background */}
       <div 
-        className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0" 
+        className="absolute inset-x-0 -top-16 bottom-0 pointer-events-none overflow-hidden select-none z-0" 
       >
         <video
           ref={videoRef}
@@ -229,7 +229,7 @@ export default function HeroSection() {
           style={{ opacity: 0 }}
         />
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-cream-bg via-transparent to-cream-bg pointer-events-none z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-cream-bg/20 via-transparent to-cream-bg pointer-events-none z-10" />
       </div>
     </section>
   );
