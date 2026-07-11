@@ -68,7 +68,7 @@ export default function HeroSection() {
   }, []);
  
   return (
-    <section id="hero" className="relative pt-24 pb-4 md:pt-28 md:pb-6 overflow-hidden bg-cream-bg text-brand-dark">
+    <section id="hero" className="relative pt-16 pb-4 md:pt-20 md:pb-6 overflow-hidden bg-cream-bg text-brand-dark">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
         <div className="text-center max-w-4xl mx-auto space-y-4">
           <h1 className="font-serif text-5xl md:text-7xl font-bold leading-[1.1] tracking-tight max-w-3xl mx-auto pt-4">
@@ -216,7 +216,7 @@ export default function HeroSection() {
  
       {/* Video Background */}
       <div 
-        className="absolute inset-x-0 -top-16 bottom-0 pointer-events-none overflow-hidden select-none z-0" 
+        className="absolute inset-x-0 -top-24 bottom-0 pointer-events-none overflow-hidden select-none z-0" 
       >
         <video
           ref={videoRef}
