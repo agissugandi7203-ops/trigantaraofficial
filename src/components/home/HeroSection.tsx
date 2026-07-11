@@ -111,15 +111,15 @@ export default function HeroSection() {
             </div>
  
             {/* Container for pop-out layout */}
-            <div className="relative w-[280px] h-[380px] flex items-end justify-center group mt-8">
+            <div className="relative w-[325px] h-[450px] flex items-end justify-center group mt-8">
               {/* Green Frame Backdrop Shape */}
-              <div className="absolute bottom-0 w-full h-[320px] bg-brand-green rounded-[140px_140px_40px_40px] border border-brand-dark/10 shadow-soft-lg z-0" />
+              <div className="absolute bottom-0 w-full h-[390px] bg-brand-green rounded-[140px_140px_40px_40px] border border-brand-dark/10 shadow-soft-lg z-0" />
               
               {/* Large overlapping image */}
               <img 
                 src="/assets/model/nazwa.webp"
                 alt="Nazwa Anggota Pramuka"
-                className="absolute bottom-0 left-[-100%] right-[-100%] mx-auto z-10 w-[384%] h-[1050px] max-w-none object-contain object-bottom transform translate-x-[-140px] select-none pointer-events-none"
+                className="absolute bottom-0 left-[-100%] right-[-100%] mx-auto z-10 w-[384%] h-[1200px] max-w-none object-contain object-bottom transform translate-x-[-160px] select-none pointer-events-none"
               />
             </div>
           </div>
@@ -164,15 +164,15 @@ export default function HeroSection() {
             </div>
  
             {/* Container for pop-out layout */}
-            <div className="relative w-[280px] h-[380px] flex items-end justify-center group mt-8">
+            <div className="relative w-[325px] h-[450px] flex items-end justify-center group mt-8">
               {/* Girl's Frame Backdrop Card */}
-              <div className="absolute bottom-0 w-full h-[320px] bg-brand-yellow rounded-[40px_140px_140px_40px] border border-brand-dark/10 shadow-soft-lg z-0" />
+              <div className="absolute bottom-0 w-full h-[390px] bg-brand-yellow rounded-[40px_140px_140px_40px] border border-brand-dark/10 shadow-soft-lg z-0" />
               
               {/* Large overlapping image */}
               <img 
                 src="/assets/model/Intan Nur Hayati No BG.webp"
                 alt="Intan Nur Hayati"
-                className="absolute bottom-0 left-[-100%] right-[-100%] mx-auto z-10 w-[384%] h-[1050px] max-w-none object-contain object-bottom transform translate-x-[-160px] select-none pointer-events-none"
+                className="absolute bottom-0 left-[-100%] right-[-100%] mx-auto z-10 w-[384%] h-[1200px] max-w-none object-contain object-bottom transform translate-x-[-185px] select-none pointer-events-none"
               />
             </div>
           </div>
