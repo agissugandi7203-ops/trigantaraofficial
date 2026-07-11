@@ -80,6 +80,10 @@ export default function HeroSection() {
           <h1 className="font-serif text-5xl md:text-7xl font-bold leading-[1.1] tracking-tight max-w-3xl mx-auto pt-8">
             Siapkan Generasi <span className="text-brand-orange italic">Tangguh</span> Bersama Trigantara
           </h1>
+
+          <p className="text-brand-dark/70 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+            Selamat datang di website resmi Pramuka SMK Marhas Margahayu. Bersama Gugus Depan Trigantara, kami membina kepramukaan modern yang membentuk karakter tangguh, mandiri, dan berprestasi.
+          </p>
  
           {/* Hero CTA buttons */}
           <div className="pt-4 flex flex-wrap justify-center gap-4">

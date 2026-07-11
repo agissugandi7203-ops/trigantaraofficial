@@ -44,7 +44,7 @@ export default function KegiatanPage() {
         title="Kegiatan Kami"
         subtitle="Agenda dan dokumentasi kegiatan kepramukaan Gudep Trigantara."
         bgVariant="green"
-        modelImage="/assets/model/shafa.png"
+        modelImage="/assets/model/shafa.webp"
         modelName="Shafa"
         modelAlign="left"
         modelSize="large"

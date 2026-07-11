@@ -39,7 +39,7 @@ export default function GaleriPage() {
         title="Galeri Foto"
         subtitle="Dokumentasi momen-momen berkesan bersama Pramuka Trigantara."
         bgVariant="yellow"
-        modelImage="/assets/model/afika.png"
+        modelImage="/assets/model/afika.webp"
         modelName="Afika"
         modelAlign="left"
         modelSize="large"

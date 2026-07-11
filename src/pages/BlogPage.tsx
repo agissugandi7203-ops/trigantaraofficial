@@ -38,7 +38,7 @@ export default function BlogPage() {
         title="Blog & Artikel"
         subtitle="Berita, tips, dan cerita dari keluarga besar Gudep Trigantara."
         bgVariant="green"
-        modelImage="/assets/model/mey.png"
+        modelImage="/assets/model/mey.webp"
         modelName="Mey"
         modelAlign="left"
         modelSize="large"
