@@ -12,6 +12,14 @@
       "destination": "/api/health"
     },
     {
+      "source": "/api/admin/r2/:action*",
+      "destination": "/api/admin/r2?action=:action*"
+    },
+    {
+      "source": "/api/admin/:action*",
+      "destination": "/api/admin/r2?action=:action*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
