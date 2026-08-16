@@ -24,6 +24,23 @@ export default class ErrorBoundary extends Component<Props, State> {
 
   override componentDidCatch(error: Error, info: ErrorInfo): void {
     console.error(`[Trigantara] Galat pada ${this.props.area ?? 'aplikasi'}:`, error, info.componentStack);
+
+    // Otomatis pulihkan jika terjadi kegagalan modul chunk akibat pembaruan versi baru di server
+    const isChunkError =
+      error.message?.includes('Failed to fetch dynamically imported module') ||
+      error.message?.includes('Importing a module script failed') ||
+      error.message?.includes('MIME type of "text/html"') ||
+      error.message?.includes('error loading dynamically imported module');
+
+    if (isChunkError) {
+      const storageKey = 'boundary_chunk_reload_' + window.location.pathname;
+      const lastReload = sessionStorage.getItem(storageKey);
+      const now = Date.now();
+      if (!lastReload || now - Number(lastReload) > 10000) {
+        sessionStorage.setItem(storageKey, String(now));
+        window.location.reload();
+      }
+    }
   }
 
   private handleReload = (): void => {

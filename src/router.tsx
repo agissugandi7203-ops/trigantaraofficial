@@ -1,4 +1,4 @@
-import { lazy, Suspense, type ReactNode } from 'react';
+import { lazy, Suspense, type ReactNode, type ComponentType } from 'react';
 import { Routes, Route } from 'react-router-dom';
 
 import Navbar from './components/layout/Navbar';
@@ -10,27 +10,60 @@ import ErrorBoundary from './components/shared/ErrorBoundary';
 import AdminLayout from './components/admin/AdminLayout';
 import ProtectedRoute from './components/admin/ProtectedRoute';
 
-const HomePage = lazy(() => import('./pages/HomePage'));
-const TentangPage = lazy(() => import('./pages/TentangPage'));
-const MateriPage = lazy(() => import('./pages/MateriPage'));
-const MateriDetailPage = lazy(() => import('./pages/MateriDetailPage'));
-const GaleriPage = lazy(() => import('./pages/GaleriPage'));
-const AngkatanPage = lazy(() => import('./pages/AngkatanPage'));
-const KegiatanPage = lazy(() => import('./pages/KegiatanPage'));
-const BlogPage = lazy(() => import('./pages/BlogPage'));
-const BlogDetailPage = lazy(() => import('./pages/BlogDetailPage'));
-const GabungPage = lazy(() => import('./pages/GabungPage'));
-const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+/**
+ * Membungkus React.lazy dengan pemulihan otomatis jika berkas chunk lama
+ * tidak ditemukan akibat deployment rilis baru ke server.
+ */
+function lazyWithRetry<T extends ComponentType<any>>(
+  factory: () => Promise<{ default: T }>
+) {
+  return lazy(async () => {
+    try {
+      return await factory();
+    } catch (err: any) {
+      const isChunkError =
+        err?.message?.includes('Failed to fetch dynamically imported module') ||
+        err?.message?.includes('Importing a module script failed') ||
+        err?.message?.includes('MIME type of "text/html"') ||
+        err?.name === 'TypeError';
 
-const LoginPage = lazy(() => import('./pages/admin/LoginPage'));
-const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'));
-const ManageArticles = lazy(() => import('./pages/admin/ManageArticles'));
-const ManageGallery = lazy(() => import('./pages/admin/ManageGallery'));
-const ManageMaterials = lazy(() => import('./pages/admin/ManageMaterials'));
-const ManageMembers = lazy(() => import('./pages/admin/ManageMembers'));
-const ManageEvents = lazy(() => import('./pages/admin/ManageEvents'));
-const ManageAngkatan = lazy(() => import('./pages/admin/ManageAngkatan'));
-const ManageStorage = lazy(() => import('./pages/admin/ManageStorage'));
+      if (isChunkError) {
+        const storageKey = 'chunk_reload_' + window.location.pathname;
+        const lastReload = sessionStorage.getItem(storageKey);
+        const now = Date.now();
+
+        if (!lastReload || now - Number(lastReload) > 10000) {
+          sessionStorage.setItem(storageKey, String(now));
+          window.location.reload();
+          return new Promise(() => {}); // tahan render sampai halaman memuat ulang
+        }
+      }
+      throw err;
+    }
+  });
+}
+
+const HomePage = lazyWithRetry(() => import('./pages/HomePage'));
+const TentangPage = lazyWithRetry(() => import('./pages/TentangPage'));
+const MateriPage = lazyWithRetry(() => import('./pages/MateriPage'));
+const MateriDetailPage = lazyWithRetry(() => import('./pages/MateriDetailPage'));
+const GaleriPage = lazyWithRetry(() => import('./pages/GaleriPage'));
+const AngkatanPage = lazyWithRetry(() => import('./pages/AngkatanPage'));
+const KegiatanPage = lazyWithRetry(() => import('./pages/KegiatanPage'));
+const BlogPage = lazyWithRetry(() => import('./pages/BlogPage'));
+const BlogDetailPage = lazyWithRetry(() => import('./pages/BlogDetailPage'));
+const GabungPage = lazyWithRetry(() => import('./pages/GabungPage'));
+const NotFoundPage = lazyWithRetry(() => import('./pages/NotFoundPage'));
+
+const LoginPage = lazyWithRetry(() => import('./pages/admin/LoginPage'));
+const DashboardPage = lazyWithRetry(() => import('./pages/admin/DashboardPage'));
+const ManageArticles = lazyWithRetry(() => import('./pages/admin/ManageArticles'));
+const ManageGallery = lazyWithRetry(() => import('./pages/admin/ManageGallery'));
+const ManageMaterials = lazyWithRetry(() => import('./pages/admin/ManageMaterials'));
+const ManageMembers = lazyWithRetry(() => import('./pages/admin/ManageMembers'));
+const ManageEvents = lazyWithRetry(() => import('./pages/admin/ManageEvents'));
+const ManageAngkatan = lazyWithRetry(() => import('./pages/admin/ManageAngkatan'));
+const ManageStorage = lazyWithRetry(() => import('./pages/admin/ManageStorage'));
 
 function PageLoading() {
   return (
