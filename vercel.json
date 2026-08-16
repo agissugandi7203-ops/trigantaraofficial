@@ -16,11 +16,11 @@
       "destination": "/api/admin/r2?action=:action*"
     },
     {
-      "source": "/api/admin/:action*",
-      "destination": "/api/admin/r2?action=:action*"
+      "source": "/api/admin/upload-url",
+      "destination": "/api/admin/r2?action=upload-url"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
   ]
