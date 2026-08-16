@@ -1,10 +1,20 @@
 node_modules/
-build/
 dist/
+build/
 coverage/
-.DS_Store
-*.log
-.env*
-!.env.example
-scratch/
 
+# Variabel lingkungan — jangan pernah di-commit
+.env
+.env.*
+!.env.example
+
+# Berkas sumber gambar resolusi penuh (tidak ikut build)
+.sumber-gambar/
+
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+scratch/

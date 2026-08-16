@@ -1,74 +1,16 @@
-import { useEffect, useRef } from 'react';
-import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
-import { Compass, Flame, ArrowUpRight, Check, Star, Target, MapPin, Globe2 } from 'lucide-react';
+import { ArrowUpRight, Star, Target, MapPin, Globe2 } from 'lucide-react';
 import { HERO_STATS } from '../../data/constants';
- 
+import { useBackgroundVideo } from '../../hooks/useBackgroundVideo';
+
 export default function HeroSection() {
-  const videoRef = useRef<HTMLVideoElement>(null);
- 
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+  const { videoRef, isReady } = useBackgroundVideo();
 
-    video.muted = true;
-    video.playsInline = true;
-    video.preload = "auto";
-    video.loop = false;
-    video.play().catch(err => console.log("Initial video play error:", err));
-
-    let animationFrameId: number;
-    let direction: 'forward' | 'backward' = 'forward';
-    let lastTime = performance.now();
-
-    const checkTime = () => {
-      const now = performance.now();
-      const delta = (now - lastTime) / 1000;
-      lastTime = now;
-
-      if (video.duration) {
-        const currentTime = video.currentTime;
-        const duration = video.duration;
-
-        let opacity = 1;
-        if (currentTime < 0.5) {
-          opacity = currentTime / 0.5;
-        } else if (duration - currentTime < 0.5) {
-          opacity = (duration - currentTime) / 0.5;
-        }
-        video.style.opacity = String(opacity);
-
-        if (direction === 'forward') {
-          if (currentTime >= duration - 0.2) {
-            direction = 'backward';
-            video.pause();
-          }
-        } else {
-          const targetTime = currentTime - delta;
-          if (targetTime <= 0.2) {
-            direction = 'forward';
-            video.currentTime = 0.2;
-            video.play().catch(err => console.log("Video rewind transition play error:", err));
-          } else {
-            video.currentTime = targetTime;
-          }
-        }
-      }
-      animationFrameId = requestAnimationFrame(checkTime);
-    };
-
-    animationFrameId = requestAnimationFrame(checkTime);
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-      if (video) {
-        video.pause();
-      }
-    };
-  }, []);
- 
   return (
-    <section id="hero" className="relative pt-16 pb-4 md:pt-20 md:pb-6 overflow-hidden bg-cream-bg text-brand-dark">
+    <section
+      id="hero"
+      className="relative pt-16 pb-4 md:pt-20 md:pb-6 overflow-hidden bg-cream-bg text-brand-dark"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
         <div className="text-center max-w-4xl mx-auto space-y-4">
           <h1 className="font-serif text-5xl md:text-7xl font-bold leading-[1.1] tracking-tight max-w-3xl mx-auto pt-4">
@@ -76,14 +18,13 @@ export default function HeroSection() {
           </h1>
 
           <p className="text-brand-dark/70 text-base md:text-lg max-w-xl mx-auto leading-relaxed">
-            Website resmi Pramuka SMK Marhas Margahayu (Gugus Depan Trigantara). Kami membina kepramukaan modern yang tangguh, mandiri, dan berprestasi.
+            Website resmi Pramuka SMK Marhas Margahayu (Gugus Depan Trigantara). Kami membina
+            kepramukaan modern yang tangguh, mandiri, dan berprestasi.
           </p>
 
-          {/* Hero CTA buttons */}
           <div className="pt-2 flex flex-wrap justify-center gap-4">
             <Link
               to="/gabung"
-              id="hero-start-learning-btn"
               className="px-8 py-4 bg-brand-orange text-white text-base sm:text-lg font-kids font-bold rounded-full border border-brand-dark/10 shadow-soft hover:bg-brand-orange/95 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer inline-flex items-center gap-2 shrink-0"
             >
               <span>Gabung Petualangan</span>
@@ -97,140 +38,167 @@ export default function HeroSection() {
             </Link>
           </div>
         </div>
- 
-        {/* Kids visual portrait rows and middle doodle */}
+
+        {/* Dua potret anggota mengapit kartu kutipan */}
         <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-8 mt-6 md:mt-10 max-w-6xl mx-auto">
-          
-          {/* Left Model Container with Pop-out 3D Effect */}
-          <div className="relative flex justify-center">
-            {/* Outer decorative archery target */}
-            <div className="absolute -bottom-4 -left-4 z-30 select-none text-brand-dark">
-              <div className="bg-white p-3 rounded-full border border-brand-dark/10 shadow-soft flex items-center justify-center animate-float">
-                <Target className="w-6 h-6 text-brand-orange" />
+          <ModelFrame
+            src="/assets/model/nazwa.webp"
+            alt="Nazwa, anggota Pramuka Trigantara"
+            backdropClass="bg-brand-green rounded-[140px_140px_40px_40px]"
+            decoration={
+              <div className="absolute -bottom-4 -left-4 z-30 select-none text-brand-dark">
+                <div className="bg-white p-3 rounded-full border border-brand-dark/10 shadow-soft flex items-center justify-center animate-float">
+                  <Target className="w-6 h-6 text-brand-orange" />
+                </div>
               </div>
-            </div>
- 
-            {/* Container for pop-out layout */}
-            <div className="relative w-[325px] h-[450px] flex items-end justify-center group mt-8">
-              {/* Green Frame Backdrop Shape */}
-              <div className="absolute bottom-0 w-full h-[390px] bg-brand-green rounded-[140px_140px_40px_40px] border border-brand-dark/10 shadow-soft-lg z-0" />
-              
-              {/* Large overlapping image */}
-              <img 
-                src="/assets/model/nazwa.webp"
-                alt="Nazwa Anggota Pramuka"
-                className="absolute bottom-0 left-[-100%] right-[-100%] mx-auto z-10 w-[384%] h-[1200px] max-w-none object-contain object-bottom transform translate-x-[-160px] select-none pointer-events-none"
-              />
-            </div>
-          </div>
- 
-          {/* Center Interactive Laptop Doodle with Quote */}
+            }
+          />
+
+          {/* Kartu kutipan tengah */}
           <div className="bg-white/80 backdrop-blur-md p-6 rounded-[2rem] border border-brand-dark/10 flex flex-col items-center text-center space-y-4 max-w-sm mx-auto shadow-soft-lg">
             <span className="font-kids text-xs font-bold uppercase tracking-wider text-brand-orange bg-brand-orange/10 px-3 py-1 rounded-full border border-brand-orange/20">
               Eksplorasi Alam
             </span>
-            
-            {/* Campfire SVG */}
+
             <div className="w-24 h-24 relative text-brand-dark shrink-0">
-              <svg viewBox="0 0 100 100" fill="none" className="w-full h-full stroke-brand-dark stroke-[2.5] stroke-linejoin-round">
-                 <path d="M10 80 L50 20 L90 80 Z" fill="#FFCE3B" />
-                 <path d="M50 20 L50 80" />
-                 <path d="M40 80 L50 60 L60 80 Z" fill="#2A1B15" />
-                 <circle cx="25" cy="40" r="2" fill="#29AC60" stroke="none" />
-                 <circle cx="75" cy="50" r="3" fill="#FF6E31" stroke="none" />
-               </svg>
+              <svg
+                viewBox="0 0 100 100"
+                fill="none"
+                aria-hidden="true"
+                className="w-full h-full stroke-brand-dark stroke-[2.5] stroke-linejoin-round"
+              >
+                <path d="M10 80 L50 20 L90 80 Z" fill="#FFCE3B" />
+                <path d="M50 20 L50 80" />
+                <path d="M40 80 L50 60 L60 80 Z" fill="#2A1B15" />
+                <circle cx="25" cy="40" r="2" fill="#29AC60" stroke="none" />
+                <circle cx="75" cy="50" r="3" fill="#FF6E31" stroke="none" />
+              </svg>
             </div>
- 
+
             <p className="font-serif text-base leading-relaxed text-brand-dark/95 italic">
-              "Satyaku Kudarmakan, Darmaku Kubaktikan. Di sini kami tidak sekadar berlatih, melainkan membentuk jiwa patriot sejati."
+              &ldquo;Satyaku Kudarmakan, Darmaku Kubaktikan. Di sini kami tidak sekadar berlatih,
+              melainkan membentuk jiwa patriot sejati.&rdquo;
             </p>
-            
-            <div className="flex gap-1">
-              <Star className="w-4 h-4 fill-brand-yellow stroke-brand-dark/20" />
-              <Star className="w-4 h-4 fill-brand-yellow stroke-brand-dark/20" />
-              <Star className="w-4 h-4 fill-brand-yellow stroke-brand-dark/20" />
-              <Star className="w-4 h-4 fill-brand-yellow stroke-brand-dark/20" />
-              <Star className="w-4 h-4 fill-brand-yellow stroke-brand-dark/20" />
+
+            <div className="flex gap-1" aria-hidden="true">
+              {Array.from({ length: 5 }, (_, i) => (
+                <Star key={i} className="w-4 h-4 fill-brand-yellow stroke-brand-dark/20" />
+              ))}
             </div>
           </div>
- 
-          {/* Right Model Container with Pop-out 3D Effect */}
-          <div className="relative flex justify-center">
-            {/* Outer Red mini-backpack decal */}
-            <div className="absolute -bottom-2 -right-2 z-30 select-none text-brand-dark">
-              <div className="bg-white p-3 rounded-full border border-brand-dark/10 shadow-soft animate-float-delayed">
-                <MapPin className="w-6 h-6 text-brand-green" />
-              </div>
-            </div>
- 
-            {/* Container for pop-out layout */}
-            <div className="relative w-[325px] h-[450px] flex items-end justify-center group mt-8">
-              {/* Girl's Frame Backdrop Card */}
-              <div className="absolute bottom-0 w-full h-[390px] bg-brand-yellow rounded-[40px_140px_140px_40px] border border-brand-dark/10 shadow-soft-lg z-0" />
-              
-              {/* Large overlapping image */}
-              <img 
-                src="/assets/model/Intan Nur Hayati No BG.webp"
-                alt="Intan Nur Hayati"
-                className="absolute bottom-0 left-[-100%] right-[-100%] mx-auto z-10 w-[384%] h-[1200px] max-w-none object-contain object-bottom transform translate-x-[-185px] select-none pointer-events-none"
-              />
-            </div>
-          </div>
-      </div>
-    </div>
- 
-    {/* Dark Chocolate Statistics Banner */}
-      <div className="py-12 px-4 max-w-7xl mx-auto z-20 relative mt-16 md:mt-24">
-        <div className="bg-brand-dark text-[#FAF6F0] rounded-[3rem] p-8 md:p-12 border border-brand-dark/20 relative overflow-hidden shadow-soft-xl">
-          {/* Wave background details */}
-          <div className="absolute top-0 right-0 w-48 h-48 bg-brand-orange/10 rounded-full blur-2xl"></div>
-          
-          {/* Flying Paper Airplane illustration in top-right */}
-          <div className="absolute top-6 right-8 text-brand-yellow select-none z-10 transform rotate-12">
-            <Globe2 className="w-10 h-10" />
-          </div>
- 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-4 divide-y md:divide-y-0 md:divide-x divide-[#FAF6F0]/20 z-10 relative">
-            {HERO_STATS.map((stat, idx) => {
-              let badgeColor = "bg-brand-orange";
-              if (idx === 1) badgeColor = "bg-brand-yellow text-brand-dark";
-              if (idx === 2) badgeColor = "bg-brand-green";
-              if (idx === 3) badgeColor = "bg-brand-blue";
- 
-              return (
-                <div key={idx} className="flex items-start gap-4 p-4 md:px-8 first:pl-0 last:pr-0">
-                  <span className={`p-3.5 ${badgeColor} rounded-2xl border border-brand-dark/10 shrink-0 shadow-soft`}>
-                    <span className="text-xl leading-none block">{stat.icon}</span>
-                  </span>
-                  <div>
-                    <h4 className="font-serif text-3xl font-bold text-brand-yellow">{stat.value}</h4>
-                    <p className="text-sm font-semibold text-[#FAF6F0]/90 mt-0.5">{stat.label}</p>
-                    <p className="text-[10px] text-[#FAF6F0]/70 uppercase font-bold tracking-wider">SMK Marhas Margahayu</p>
-                  </div>
+
+          <ModelFrame
+            src="/assets/model/Intan Nur Hayati No BG.webp"
+            alt="Intan Nur Hayati, anggota Pramuka Trigantara"
+            backdropClass="bg-brand-yellow rounded-[40px_140px_140px_40px]"
+            decoration={
+              <div className="absolute -bottom-2 -right-2 z-30 select-none text-brand-dark">
+                <div className="bg-white p-3 rounded-full border border-brand-dark/10 shadow-soft animate-float-delayed">
+                  <MapPin className="w-6 h-6 text-brand-green" />
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            }
+          />
         </div>
       </div>
- 
-      {/* Video Background */}
-      <div 
-        className="absolute inset-x-0 -top-24 bottom-0 pointer-events-none overflow-hidden select-none z-0" 
+
+      {/* Panel statistik */}
+      <div className="py-12 px-4 max-w-7xl mx-auto z-20 relative mt-16 md:mt-24">
+        <div className="bg-brand-dark text-[#FAF6F0] rounded-[3rem] p-8 md:p-12 border border-brand-dark/20 relative overflow-hidden shadow-soft-xl">
+          <div className="absolute top-0 right-0 w-48 h-48 bg-brand-orange/10 rounded-full blur-2xl" aria-hidden="true" />
+          <div className="absolute top-6 right-8 text-brand-yellow select-none z-10 rotate-12" aria-hidden="true">
+            <Globe2 className="w-10 h-10" />
+          </div>
+
+          <dl className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-4 divide-y md:divide-y-0 md:divide-x divide-[#FAF6F0]/20 z-10 relative">
+            {HERO_STATS.map((stat, idx) => (
+              <div key={stat.label} className="flex items-start gap-4 p-4 md:px-8 first:pl-0 last:pr-0">
+                <span
+                  className={`p-3.5 ${STAT_BADGE_COLORS[idx % STAT_BADGE_COLORS.length]} rounded-2xl border border-brand-dark/10 shrink-0 shadow-soft`}
+                  aria-hidden="true"
+                >
+                  <span className="text-xl leading-none block">{stat.icon}</span>
+                </span>
+                <div>
+                  <dd className="font-serif text-3xl font-bold text-brand-yellow">{stat.value}</dd>
+                  <dt className="text-sm font-semibold text-[#FAF6F0]/90 mt-0.5">{stat.label}</dt>
+                  <p className="text-[10px] text-[#FAF6F0]/70 uppercase font-bold tracking-wider">
+                    SMK Marhas Margahayu
+                  </p>
+                </div>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </div>
+
+      {/* Video latar. Dekoratif sepenuhnya — tidak memuat informasi apa pun,
+          sehingga aman disembunyikan dari pembaca layar dan dilewati bila
+          pengguna memilih mengurangi gerakan. */}
+      <div
+        className="absolute inset-x-0 -top-24 bottom-0 pointer-events-none overflow-hidden select-none z-0"
+        aria-hidden="true"
       >
         <video
           ref={videoRef}
           src="/assets/video/hero-bg.mp4"
+          poster="/assets/angkatan/2026-2027/fotobersama27.webp"
           muted
+          loop
           playsInline
           autoPlay
-          loop
-          className="w-full h-full object-cover object-top transition-opacity duration-300"
-          style={{ opacity: 0 }}
+          preload="metadata"
+          disablePictureInPicture
+          tabIndex={-1}
+          className={`w-full h-full object-cover object-top transition-opacity duration-700 ${
+            isReady ? 'opacity-100' : 'opacity-0'
+          }`}
         />
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-cream-bg/20 via-transparent to-cream-bg pointer-events-none z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-cream-bg/20 via-transparent to-cream-bg z-10" />
       </div>
     </section>
+  );
+}
+
+const STAT_BADGE_COLORS = [
+  'bg-brand-orange',
+  'bg-brand-yellow text-brand-dark',
+  'bg-brand-green',
+  'bg-brand-blue',
+] as const;
+
+/**
+ * Bingkai potret anggota: gambar besar yang sengaja "meluber" keluar dari
+ * kotak berwarna di belakangnya.
+ */
+function ModelFrame({
+  src,
+  alt,
+  backdropClass,
+  decoration,
+}: {
+  src: string;
+  alt: string;
+  backdropClass: string;
+  decoration: React.ReactNode;
+}) {
+  return (
+    <div className="relative flex justify-center">
+      {decoration}
+      <div className="relative w-[280px] h-[420px] sm:w-[325px] sm:h-[480px] flex items-end justify-center mt-8 select-none group">
+        <div
+          className={`absolute bottom-0 w-full h-[360px] sm:h-[410px] border border-brand-dark/10 shadow-soft-lg z-0 transition-transform duration-300 group-hover:scale-[1.02] ${backdropClass}`}
+          aria-hidden="true"
+        />
+        <img
+          src={src}
+          alt={alt}
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
+          className="absolute bottom-0 z-10 w-full h-[410px] sm:h-[480px] object-contain object-bottom select-none pointer-events-none transition-transform duration-300 group-hover:scale-[1.03]"
+        />
+      </div>
+    </div>
   );
 }

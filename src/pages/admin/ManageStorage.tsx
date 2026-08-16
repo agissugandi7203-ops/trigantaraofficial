@@ -1,10 +1,10 @@
 import { useEffect, useState, ChangeEvent, MouseEvent as ReactMouseEvent, DragEvent, useRef } from 'react';
-import { uploadFileToR2 } from '../../lib/r2';
 import ConfirmModal from '../../components/admin/ConfirmModal';
 import { 
   FolderOpen, FileImage, Trash2, UploadCloud, FolderPlus, 
   ChevronRight, Home, RefreshCw, File, ArrowLeft, Download,
-  X, CheckCircle, AlertCircle, XCircle, ChevronDown, ChevronUp
+  X, CheckCircle, AlertCircle, XCircle, ChevronDown, ChevronUp,
+  Copy, Check
 } from 'lucide-react';
 
 interface R2Item {
@@ -41,6 +41,7 @@ export default function ManageStorage() {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
   const [showDeleteSelectedConfirm, setShowDeleteSelectedConfirm] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   // Clear selection when navigating to another folder
   useEffect(() => {
@@ -754,7 +755,31 @@ export default function ManageStorage() {
                 <p className="text-[10px] text-zinc-400 mt-0.5">{formatSize(file.size || 0)}</p>
               </div>
 
-              {/* Download / Open Button */}
+              {/* Action Buttons: Copy URL, Download, Delete */}
+              {file.url && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigator.clipboard.writeText(file.url || '');
+                    setCopiedKey(file.key);
+                    setTimeout(() => setCopiedKey(null), 2000);
+                  }}
+                  className={`absolute top-3 right-19 z-10 w-7 h-7 bg-white/90 backdrop-blur-sm border rounded-lg flex items-center justify-center transition-all duration-200 shadow-sm cursor-pointer ${
+                    copiedKey === file.key
+                      ? 'border-emerald-300 text-emerald-600 opacity-100'
+                      : 'text-zinc-600 border-zinc-200 hover:bg-zinc-100 hover:text-zinc-900 opacity-0 group-hover:opacity-100'
+                  }`}
+                  title={copiedKey === file.key ? 'URL Berhasil Disalin!' : 'Salin URL Gambar'}
+                >
+                  {copiedKey === file.key ? (
+                    <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  ) : (
+                    <Copy className="w-3.5 h-3.5" />
+                  )}
+                </button>
+              )}
+
               {file.url && (
                 <a
                   href={`/api/admin/r2/download?key=${encodeURIComponent(file.key)}&token=${encodeURIComponent(token || '')}`}

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import type { Angkatan } from '../../types';
 import ConfirmModal from '../../components/admin/ConfirmModal';
-import { GraduationCap, Edit, Trash2 } from 'lucide-react';
+import { GraduationCap } from 'lucide-react';
 
 export default function ManageAngkatan() {
   const [angkatan, setAngkatan] = useState<Angkatan[]>([]);

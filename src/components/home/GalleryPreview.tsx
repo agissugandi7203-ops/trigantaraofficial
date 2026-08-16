@@ -1,34 +1,35 @@
-import { useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase } from '../../lib/supabase';
+import { supabase, query } from '../../lib/supabase';
+import { getR2PublicUrl } from '../../lib/r2';
 import SectionHeading from '../shared/SectionHeading';
 import { useScrollAnimation } from '../../hooks/useScrollAnimation';
-import type { GalleryItem } from '../../types';
+import { useAsyncData } from '../../hooks/useAsyncData';
+import type { GalleryListItem } from '../../types';
 
-const FALLBACK_IMAGES = [
-  { url: '/assets/angkatan/2025-2026/fotobersama26.webp', title: 'Angkatan 2025-2026' },
-  { url: '/assets/angkatan/2026-2027/fotobersama27.webp', title: 'Angkatan 2026-2027' },
+const CADANGAN = [
+  { url: '/assets/angkatan/2025-2026/fotobersama26.webp', title: 'Angkatan 2025 – 2026' },
+  { url: '/assets/angkatan/2026-2027/fotobersama27.webp', title: 'Angkatan 2026 – 2027' },
 ];
 
 export default function GalleryPreview() {
-  const [items, setItems] = useState<GalleryItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const fetchGallery = useCallback(
+    (signal: AbortSignal) =>
+      query<GalleryListItem[]>(
+        supabase
+          .from('gallery')
+          .select('id, judul, foto_url, kategori')
+          .order('urutan', { ascending: true })
+          .order('created_at', { ascending: false })
+          .limit(6)
+          .abortSignal(signal)
+      ),
+    []
+  );
 
-  useEffect(() => {
-    async function fetchGallery() {
-      const { data } = await supabase
-        .from('gallery')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(6);
-
-      setItems(data || []);
-      setLoading(false);
-    }
-    fetchGallery();
-  }, []);
-
-  const hasData = items.length > 0;
+  // Galeri kosong maupun gagal dimuat sama-sama menampilkan foto angkatan
+  // sebagai cadangan — beranda tidak boleh terlihat rusak karenanya.
+  const { data: items, loading } = useAsyncData<GalleryListItem[]>(fetchGallery, [], []);
 
   return (
     <section className="py-20 lg:py-28 bg-cream-bg relative border-t border-b border-brand-dark/5">
@@ -40,10 +41,15 @@ export default function GalleryPreview() {
         />
 
         {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="w-8 h-8 border-4 border-brand-dark border-t-brand-orange rounded-full animate-spin" />
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-6" aria-hidden="true">
+            {Array.from({ length: 6 }, (_, i) => (
+              <div
+                key={i}
+                className="aspect-[4/3] rounded-[2rem] bg-brand-dark/5 border border-brand-dark/10 animate-pulse"
+              />
+            ))}
           </div>
-        ) : hasData ? (
+        ) : items.length > 0 ? (
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
             {items.map((item, i) => (
               <GalleryCard key={item.id} item={item} index={i} />
@@ -51,7 +57,7 @@ export default function GalleryPreview() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {FALLBACK_IMAGES.map((img, i) => (
+            {CADANGAN.map((img, i) => (
               <FallbackCard key={img.url} image={img} index={i} />
             ))}
           </div>
@@ -62,8 +68,7 @@ export default function GalleryPreview() {
             to="/galeri"
             className="px-8 py-4 bg-brand-green text-white font-kids font-bold text-sm sm:text-base rounded-full border border-brand-dark/10 shadow-soft hover:-translate-y-0.5 active:translate-y-0 hover:shadow-md transition-all inline-flex items-center gap-2"
           >
-            <span>Buka Galeri Foto Lengkap</span>
-            <span>➔</span>
+            Buka Galeri Foto Lengkap <span aria-hidden="true">➔</span>
           </Link>
         </div>
       </div>
@@ -71,35 +76,41 @@ export default function GalleryPreview() {
   );
 }
 
-function GalleryCard({ item, index }: { item: GalleryItem; index: number }) {
+function GalleryCard({ item, index }: { item: GalleryListItem; index: number }) {
   const { ref, isVisible } = useScrollAnimation();
 
   return (
     <div
       ref={ref}
-      className={`animate-scale-in stagger-${index + 1} ${isVisible ? 'visible' : ''} flex`}
+      className={`animate-scale-in stagger-${(index % 5) + 1} ${isVisible ? 'visible' : ''} flex`}
     >
-      <div className="group relative overflow-hidden rounded-[2rem] border border-brand-dark/15 aspect-[4/3] bg-cream-dark w-full shadow-soft hover:shadow-soft-lg cursor-pointer transition-[transform,box-shadow] duration-300">
+      <Link
+        to="/galeri"
+        className="group relative overflow-hidden rounded-[2rem] border border-brand-dark/15 aspect-[4/3] bg-cream-dark w-full shadow-soft hover:shadow-soft-lg transition-[transform,box-shadow] duration-300 block"
+      >
         <img
-          src={item.foto_url}
+          src={getR2PublicUrl(item.foto_url)}
           alt={item.judul}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 will-change-transform"
           loading="lazy"
+          decoding="async"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
-        
-        {/* Floating details box on hover */}
-        <div className="absolute bottom-3 left-3 right-3 bg-white border border-brand-dark/10 rounded-2xl p-3 shadow-soft transform translate-y-[120%] group-hover:translate-y-0 transition-transform duration-300 pointer-events-none">
-          <p className="text-brand-dark font-kids font-bold text-xs sm:text-sm line-clamp-1">{item.judul}</p>
+        <span className="absolute bottom-3 left-3 right-3 bg-white border border-brand-dark/10 rounded-2xl p-3 shadow-soft translate-y-[120%] group-hover:translate-y-0 group-focus-visible:translate-y-0 transition-transform duration-300 pointer-events-none block">
+          <span className="text-brand-dark font-kids font-bold text-xs sm:text-sm line-clamp-1 block">
+            {item.judul}
+          </span>
           {item.kategori && (
-            <p className="text-brand-orange font-kids font-bold text-[10px] uppercase mt-0.5">{item.kategori}</p>
+            <span className="text-brand-orange font-kids font-bold text-[10px] uppercase mt-0.5 block">
+              {item.kategori}
+            </span>
           )}
-        </div>
-      </div>
+        </span>
+      </Link>
     </div>
   );
 }
 
-function FallbackCard({ image, index }: { image: typeof FALLBACK_IMAGES[0]; index: number }) {
+function FallbackCard({ image, index }: { image: (typeof CADANGAN)[number]; index: number }) {
   const { ref, isVisible } = useScrollAnimation();
 
   return (
@@ -107,26 +118,28 @@ function FallbackCard({ image, index }: { image: typeof FALLBACK_IMAGES[0]; inde
       ref={ref}
       className={`animate-scale-in stagger-${index + 1} ${isVisible ? 'visible' : ''} flex`}
     >
-      <div className="group bg-white rounded-[2rem] border border-brand-dark/15 overflow-hidden w-full shadow-soft hover:shadow-soft-lg transition-[transform,box-shadow] duration-300 flex flex-col">
-        <div className="h-64 overflow-hidden border-b border-brand-dark/10 bg-cream-dark relative">
+      <figure className="group bg-white rounded-[2rem] border border-brand-dark/15 overflow-hidden w-full shadow-soft hover:shadow-soft-lg transition-shadow duration-300 flex flex-col">
+        <div className="aspect-[16/10] overflow-hidden border-b border-brand-dark/10 bg-cream-dark relative">
           <img
             src={image.url}
-            alt={image.title}
-            className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500 will-change-transform"
+            alt={`Foto bersama ${image.title}`}
+            loading="lazy"
+            decoding="async"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
-          <div className="absolute top-3 left-3 bg-brand-yellow text-brand-dark border border-brand-dark/10 shadow-soft px-3 py-1 rounded-full text-xs font-kids font-bold">
+          <span className="absolute top-3 left-3 bg-brand-yellow text-brand-dark border border-brand-dark/10 shadow-soft px-3 py-1 rounded-full text-xs font-kids font-bold">
             Dokumentasi Gudep
-          </div>
+          </span>
         </div>
-        <div className="p-5 flex-1 flex flex-col justify-center">
-          <h4 className="font-serif text-xl font-bold text-brand-dark group-hover:text-brand-orange transition-colors">
+        <figcaption className="p-5 flex-1 flex flex-col justify-center">
+          <h3 className="font-serif text-xl font-bold text-brand-dark group-hover:text-brand-orange transition-colors">
             {image.title}
-          </h4>
+          </h3>
           <p className="text-xs sm:text-sm text-brand-dark/70 font-sans mt-1">
             Foto bersama angkatan aktif Pramuka Trigantara.
           </p>
-        </div>
-      </div>
+        </figcaption>
+      </figure>
     </div>
   );
 }

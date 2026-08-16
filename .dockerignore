@@ -2,9 +2,14 @@ node_modules
 dist
 .git
 .gitignore
+.github
 .env
-.env.local
+.env.*
+.sumber-gambar
+supabase
+scripts
 *.md
+!README.md
 .vscode
 .idea
 *.log

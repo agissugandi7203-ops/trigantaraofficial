@@ -1,43 +1,52 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Fredoka:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+/* ==========================================================================
+   Trigantara — Gaya global
+   --------------------------------------------------------------------------
+   Font dimuat lewat <link> di index.html, bukan @import di sini.
+   `@import` pada berkas CSS memaksa peramban mengunduh CSS lebih dulu,
+   membacanya, baru mengetahui font perlu diunduh — sebuah rantai tunggu
+   berantai yang menunda tampilnya teks. Dengan <link rel="preconnect"> +
+   <link rel="stylesheet"> di HTML, keduanya diunduh berbarengan.
+   ========================================================================== */
+
 @import "tailwindcss";
 
 @theme {
-  --font-serif: "DM Serif Display", serif;
-  --font-sans: "Outfit", sans-serif;
-  --font-kids: "Fredoka", sans-serif;
-  
-  /* === Playful Neo-Brutalist Color Palette === */
-  --color-cream-bg: #FAF6F0;
-  --color-cream-card: #FDFBF7;
-  --color-cream-dark: #F0EBE0;
-  
-  --color-brand-dark: #2A1B15;
-  --color-brand-text: #2A1B15;
-  
-  --color-brand-orange: #FF6E31;
-  --color-brand-green: #29AC60;
-  --color-brand-yellow: #FFCE3B;
-  --color-brand-blue: #3482F6;
-  
-  /* Backward compatibility for Pramuka brown / gold classes */
-  --color-pramuka-brown: #6B3A2A;
-  --color-pramuka-brown-light: #8B5E3C;
-  --color-pramuka-brown-dark: #4A2618;
-  
-  --color-pramuka-green: #29AC60;
-  --color-pramuka-green-light: #4CAF50;
-  --color-pramuka-green-dark: #1B5E20;
-  
-  --color-pramuka-gold: #FFCE3B;
-  --color-pramuka-gold-light: #FFD54F;
-  --color-pramuka-gold-dark: #B8860B;
-  
-  --color-pramuka-red: #FF6E31;
-  --color-pramuka-red-light: #EF5350;
+  --font-serif: "DM Serif Display", Georgia, serif;
+  --font-sans: "Outfit", system-ui, -apple-system, sans-serif;
+  --font-kids: "Fredoka", system-ui, sans-serif;
+
+  /* === Palet utama === */
+  --color-cream-bg: #faf6f0;
+  --color-cream-card: #fdfbf7;
+  --color-cream-dark: #f0ebe0;
+
+  --color-brand-dark: #2a1b15;
+  --color-brand-text: #2a1b15;
+
+  --color-brand-orange: #ff6e31;
+  --color-brand-green: #29ac60;
+  --color-brand-yellow: #ffce3b;
+  --color-brand-blue: #3482f6;
+
+  /* === Warna warisan (masih dipakai beberapa komponen) === */
+  --color-pramuka-brown: #6b3a2a;
+  --color-pramuka-green: #29ac60;
+  --color-pramuka-gold: #ffce3b;
+  --color-pramuka-gold-light: #ffd54f;
+  --color-pramuka-red: #ff6e31;
 }
 
+/* --------------------------------------------------------------------------
+   Dasar
+   --------------------------------------------------------------------------
+   `scroll-behavior: smooth` sengaja TIDAK dipasang. Lenis sudah menghaluskan
+   gulir; menumpuknya dengan penghalusan bawaan peramban membuat keduanya
+   saling berebut posisi gulir dan menimbulkan gerakan tersendat.
+   -------------------------------------------------------------------------- */
+
 html {
-  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -46,9 +55,25 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
-/* ===== Custom Scrollbar ===== */
+/* Target fokus yang terlihat jelas untuk pengguna papan ketik. */
+:focus-visible {
+  outline: 3px solid var(--color-brand-orange);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+img,
+video {
+  max-width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   Batang gulir
+   -------------------------------------------------------------------------- */
+
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -56,72 +81,86 @@ body {
   background: var(--color-cream-bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: #a1a1aa;
+  background: #c4b8a8;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #71717a;
+  background: #a1907c;
 }
 
-/* ===== Scroll Animation Classes ===== */
-.animate-slide-up {
-  opacity: 0;
-  transform: translateY(40px);
-  will-change: transform, opacity;
-  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.animate-slide-up.visible {
-  opacity: 1;
-  transform: translateY(0);
+::selection {
+  background: var(--color-pramuka-gold-light);
+  color: var(--color-brand-dark);
 }
 
-.animate-fade-in {
-  opacity: 0;
-  will-change: opacity;
-  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.animate-fade-in.visible {
-  opacity: 1;
-}
+/* --------------------------------------------------------------------------
+   Animasi masuk saat digulir
+   --------------------------------------------------------------------------
+   Catatan kinerja: `will-change` sengaja dihilangkan. Properti itu memaksa
+   peramban membuat lapisan komposit terpisah dan MEMPERTAHANKANNYA selamanya.
+   Karena kelas ini dipakai belasan kali per halaman, hasilnya adalah puluhan
+   lapisan permanen yang memakan memori GPU — persis yang membuat gulir terasa
+   berat di laptop dan ponsel kelas menengah. `opacity` dan `transform` sudah
+   dianimasikan di GPU tanpa perlu petunjuk tambahan.
+   -------------------------------------------------------------------------- */
 
+.animate-slide-up,
+.animate-fade-in,
 .animate-scale-in {
   opacity: 0;
-  transform: scale(0.95);
-  will-change: transform, opacity;
-  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+.animate-slide-up {
+  transform: translateY(40px);
+}
+.animate-scale-in {
+  transform: scale(0.95);
+}
+
+.animate-slide-up.visible,
+.animate-fade-in.visible,
 .animate-scale-in.visible {
   opacity: 1;
-  transform: scale(1);
+  transform: none;
 }
 
-/* Stagger children delays */
-.stagger-1 { transition-delay: 0.1s; }
-.stagger-2 { transition-delay: 0.2s; }
-.stagger-3 { transition-delay: 0.3s; }
-.stagger-4 { transition-delay: 0.4s; }
-.stagger-5 { transition-delay: 0.5s; }
+.stagger-1 { transition-delay: 0.08s; }
+.stagger-2 { transition-delay: 0.16s; }
+.stagger-3 { transition-delay: 0.24s; }
+.stagger-4 { transition-delay: 0.32s; }
+.stagger-5 { transition-delay: 0.4s; }
 
-/* ===== Keyframe Animations ===== */
+/* --------------------------------------------------------------------------
+   Animasi berulang
+   -------------------------------------------------------------------------- */
+
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-12px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
 }
+
 @keyframes float-delayed {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.3); }
-  50% { box-shadow: 0 0 20px 8px rgba(46, 125, 50, 0.15); }
-}
+
 @keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .animate-float {
@@ -130,28 +169,28 @@ body {
 .animate-float-delayed {
   animation: float-delayed 5s ease-in-out infinite 1s;
 }
-.animate-float-slow {
-  animation: float 7s ease-in-out infinite;
-}
-.animate-float-fast {
-  animation: float 2.5s ease-in-out infinite;
-}
-.animate-pulse-glow {
-  animation: pulse-glow 3s ease-in-out infinite;
-}
 .animate-spin-slow {
   animation: spin-slow 20s linear infinite;
 }
 
-/* ===== Soft Brutalism Shadows & Outlines ===== */
+/* --------------------------------------------------------------------------
+   Bayangan
+   -------------------------------------------------------------------------- */
+
 .shadow-soft {
-  box-shadow: 0 8px 30px rgba(42, 27, 21, 0.04), 0 2px 8px rgba(42, 27, 21, 0.02);
+  box-shadow:
+    0 8px 30px rgba(42, 27, 21, 0.04),
+    0 2px 8px rgba(42, 27, 21, 0.02);
 }
 .shadow-soft-lg {
-  box-shadow: 0 16px 40px rgba(42, 27, 21, 0.06), 0 4px 16px rgba(42, 27, 21, 0.03);
+  box-shadow:
+    0 16px 40px rgba(42, 27, 21, 0.06),
+    0 4px 16px rgba(42, 27, 21, 0.03);
 }
 .shadow-soft-xl {
-  box-shadow: 0 24px 60px rgba(42, 27, 21, 0.08), 0 8px 24px rgba(42, 27, 21, 0.04);
+  box-shadow:
+    0 24px 60px rgba(42, 27, 21, 0.08),
+    0 8px 24px rgba(42, 27, 21, 0.04);
 }
 .shadow-sticker {
   box-shadow: 4px 4px 0 rgba(42, 27, 21, 0.15);
@@ -159,67 +198,222 @@ body {
 .shadow-sticker-lg {
   box-shadow: 6px 6px 0 rgba(42, 27, 21, 0.15);
 }
-.shadow-sticker-hover {
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.shadow-sticker-hover:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 8px 8px 0 rgba(42, 27, 21, 0.2);
-}
 
-/* ===== Scrapbook Textures ===== */
-.bg-scrapbook {
-  background-color: var(--color-cream-bg);
-  background-image: radial-gradient(var(--color-brand-dark) 0.5px, transparent 0.5px), radial-gradient(var(--color-brand-dark) 0.5px, var(--color-cream-bg) 0.5px);
-  background-size: 20px 20px;
-  background-position: 0 0, 10px 10px;
-  background-attachment: fixed;
-  opacity: 0.98;
-}
+/* --------------------------------------------------------------------------
+   Konten artikel & materi (hasil render HTML dari basis data)
+   -------------------------------------------------------------------------- */
 
-/* ===== Badge & Shield Shape Utilities ===== */
-.badge-shield {
-  clip-path: polygon(50% 0%, 100% 15%, 100% 75%, 50% 100%, 0% 75%, 0% 15%);
+.konten-kaya {
+  color: rgba(42, 27, 21, 0.9);
+  line-height: 1.8;
+  font-size: 1rem;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
+  max-width: 100%;
 }
-.badge-organic {
-  border-radius: 60% 40% 60% 40% / 40% 60% 40% 60%;
+.konten-kaya > * + * {
+  margin-top: 1.1em;
 }
-.badge-sticker-wavy {
-  border-radius: 30% 70% 70% 30% / 50% 30% 70% 50%;
+.konten-kaya h2 {
+  font-family: var(--font-serif);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-brand-dark);
+  margin-top: 2.2em;
+  padding-bottom: 0.3em;
+  border-bottom: 2px solid rgba(42, 27, 21, 0.08);
 }
-
-/* ===== Gradient Backgrounds ===== */
-.bg-pramuka-gradient {
-  background: linear-gradient(135deg, #4A2618 0%, #2E7D32 50%, #1B5E20 100%);
+.konten-kaya h3 {
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-brand-dark);
+  margin-top: 1.8em;
 }
-.bg-pramuka-warm {
-  background: linear-gradient(135deg, #6B3A2A 0%, #8B5E3C 100%);
+.konten-kaya h4 {
+  font-family: var(--font-kids);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-brand-orange);
+  margin-top: 1.5em;
 }
-.bg-pramuka-hero {
-  background: linear-gradient(160deg, #1E1108 0%, #4A2618 35%, #2E4A1B 70%, #1B3A10 100%);
+.konten-kaya p {
+  margin-bottom: 0;
 }
-.bg-gold-shimmer {
-  background: linear-gradient(90deg, #B8860B, #FFD54F, #D4A017, #FFD54F, #B8860B);
-  background-size: 200% auto;
-  animation: shimmer 3s linear infinite;
+.konten-kaya ul,
+.konten-kaya ol {
+  padding-left: 1.5rem;
 }
-
-/* ===== Glass Effect ===== */
-.glass {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+.konten-kaya ul {
+  list-style: disc;
 }
-.glass-light {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+.konten-kaya ol {
+  list-style: decimal;
 }
-
-/* ===== Selection ===== */
-::selection {
-  background: var(--color-pramuka-gold-light);
+.konten-kaya li {
+  margin-top: 0.5em;
+}
+.konten-kaya li::marker {
+  color: var(--color-brand-orange);
+  font-weight: 700;
+}
+.konten-kaya strong {
+  font-weight: 700;
   color: var(--color-brand-dark);
 }
+.konten-kaya a {
+  color: var(--color-brand-orange);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.konten-kaya a:hover {
+  color: #e85a1c;
+}
+.konten-kaya blockquote {
+  border-left: 4px solid var(--color-brand-yellow);
+  background: rgba(255, 206, 59, 0.08);
+  padding: 1rem 1.25rem;
+  border-radius: 0 1rem 1rem 0;
+  font-style: italic;
+}
+.konten-kaya blockquote p {
+  margin: 0;
+}
+.konten-kaya table {
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1.5em 0;
+  border-radius: 0.75rem;
+}
+.konten-kaya th,
+.konten-kaya td {
+  border: 1px solid rgba(42, 27, 21, 0.12);
+  padding: 0.6rem 0.8rem;
+  text-align: left;
+  white-space: nowrap;
+}
+.konten-kaya th {
+  background: rgba(42, 27, 21, 0.05);
+  font-family: var(--font-kids);
+  font-weight: 700;
+}
+.konten-kaya pre {
+  background: rgba(42, 27, 21, 0.04);
+  border: 1px solid rgba(42, 27, 21, 0.1);
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  max-width: 100%;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  white-space: pre;
+  -webkit-overflow-scrolling: touch;
+}
+.konten-kaya pre code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+  color: inherit;
+}
+.konten-kaya code {
+  background: rgba(42, 27, 21, 0.06);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+.konten-kaya img {
+  border-radius: 1rem;
+  border: 2px solid rgba(42, 27, 21, 0.1);
+  height: auto;
+}
+.konten-kaya hr {
+  border: 0;
+  border-top: 2px dashed rgba(42, 27, 21, 0.15);
+  margin: 2.5em 0;
+}
+
+/* --------------------------------------------------------------------------
+   Menghormati preferensi "kurangi gerakan"
+   --------------------------------------------------------------------------
+   Sebagian orang mengalami pusing atau mual karena animasi (motion sickness,
+   gangguan vestibular). Sistem operasi menyediakan setelan untuk itu, dan
+   website wajib mematuhinya.
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-slide-up,
+  .animate-fade-in,
+  .animate-scale-in {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Animasi masuk untuk elemen yang dulu ditangani pustaka animasi JavaScript
+   -------------------------------------------------------------------------- */
+
+@keyframes dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes enter-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-dropdown {
+  animation: dropdown-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-enter-up {
+  animation: enter-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-enter-pop {
+  animation: enter-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }

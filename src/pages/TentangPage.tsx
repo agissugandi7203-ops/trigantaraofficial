@@ -3,11 +3,18 @@ import { GUDEP_INFO } from '../data/constants';
 import SectionHeading from '../components/shared/SectionHeading';
 import SubpageHeader from '../components/shared/SubpageHeader';
 import { Target, Compass } from 'lucide-react';
+import { useSeo } from '../hooks/useSeo';
 
 export default function TentangPage() {
+  useSeo({
+    title: 'Tentang Gugus Depan Trigantara',
+    description:
+      'Sejarah, visi misi, Ambalan Ki Hajar Dewantara & Inggit Garnasih, serta pembina Gugus Depan Trigantara 29.039 – 29.040 SMK Marhas Margahayu.',
+    path: '/tentang',
+  });
+
   return (
     <main className="min-h-screen bg-cream-bg text-brand-dark">
-      {/* Hero Banner replaced by SubpageHeader */}
       <SubpageHeader
         badge="Profil Organisasi"
         title={`Gugus Depan ${GUDEP_INFO.nama.replace('Gugus Depan ', '')}`}
@@ -50,7 +57,7 @@ function SejarahSection() {
                 <span className="text-xl">📋</span>
                 <div>
                   <p className="text-[10px] font-kids font-bold text-brand-dark/50 leading-none">Nomor Gudep</p>
-                  <p className="text-sm font-kids font-bold text-brand-green mt-0.5">{GUDEP_INFO.noGudep}</p>
+                  <p className="text-sm font-kids font-bold text-brand-green mt-0.5">{GUDEP_INFO.nomorGudep}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 px-4 py-2.5 bg-white border border-brand-dark/10 rounded-xl shadow-soft">
@@ -141,7 +148,7 @@ function AmbalanSection() {
                     Putra
                   </div>
                   <img
-                    src="/assets/logo/AMBALAN PUTRA.png"
+                    src="/assets/logo/AMBALAN PUTRA.webp"
                     alt="Logo Ambalan Putra"
                     className="w-full h-full object-contain"
                   />
@@ -170,7 +177,7 @@ function AmbalanSection() {
                   </div>
                   {/* Changed path to AMBALAN PUTRI.png to ensure it exists */}
                   <img
-                    src="/assets/logo/AMBALAN PUTRI.png"
+                    src="/assets/logo/AMBALAN PUTRI.webp"
                     alt="Logo Ambalan Putri"
                     className="w-full h-full object-contain"
                   />
@@ -205,8 +212,8 @@ function PembinaSection() {
       kuotes: 'Pramuka melatih kita menjadi pribadi yang mandiri, berkarakter, dan selalu siap sedia berbakti bagi masyarakat.',
       badgeColor: 'bg-brand-green',
       iconColor: 'text-brand-green',
-      rotate: 'rotate-[-2deg]',
-      logo: '/assets/logo/AMBALAN PUTRA.png'
+      rotate: '-rotate-2',
+      logo: '/assets/logo/AMBALAN PUTRA.webp'
     },
     {
       nama: 'Kak Rina Mariana, S.Pd.',
@@ -214,8 +221,8 @@ function PembinaSection() {
       kuotes: 'Melalui kebersamaan dan kedisiplinan, kita wujudkan generasi muda yang tangguh, cerdas, dan berakhlak mulia.',
       badgeColor: 'bg-[#8B5E3C]',
       iconColor: 'text-[#8B5E3C]',
-      rotate: 'rotate-[2deg]',
-      logo: '/assets/logo/AMBALAN PUTRI.png'
+      rotate: 'rotate-2',
+      logo: '/assets/logo/AMBALAN PUTRI.webp'
     }
   ];
 
@@ -242,15 +249,15 @@ function PembinaSection() {
               >
                 <div className="bg-white rounded-[2.5rem] border border-brand-dark/15 p-8 w-full shadow-soft hover:shadow-soft-lg flex flex-col sm:flex-row gap-8 items-center hover:-translate-y-1 transition-all duration-300 group">
                   {/* Pop-out Character Card (Hero reference style) */}
-                  <div className="relative w-[180px] h-[220px] shrink-0 flex items-end justify-center select-none overflow-visible">
+                  <div className="relative w-[200px] h-[250px] shrink-0 flex items-end justify-center select-none overflow-visible">
                     {/* Backdrop Shape */}
-                    <div className={`absolute bottom-0 w-full h-[170px] ${isPutra ? 'bg-brand-green' : 'bg-[#8B5E3C]'} rounded-[60px_60px_20px_20px] border border-brand-dark/10 shadow-soft z-0 transition-transform duration-300 group-hover:scale-[1.02]`} />
+                    <div className={`absolute bottom-0 w-full h-[190px] ${isPutra ? 'bg-brand-green' : 'bg-[#8B5E3C]'} rounded-[80px_80px_25px_25px] border border-brand-dark/10 shadow-soft z-0 transition-transform duration-300 group-hover:scale-[1.02]`} />
                     
                     {/* Character image */}
                     <img
                       src={isPutra ? '/assets/model/FAHRI Anggay No BG.webp' : '/assets/model/afika.webp'}
                       alt={pembina.nama}
-                      className="absolute bottom-0 w-[380%] h-[380px] left-[-140%] right-[-140%] mx-auto z-10 max-w-none object-contain object-bottom select-none pointer-events-none transition-transform duration-300 group-hover:scale-[1.03]"
+                      className="absolute bottom-0 z-10 w-auto h-[260px] max-w-none object-contain object-bottom select-none pointer-events-none transition-transform duration-300 group-hover:scale-[1.03]"
                     />
                   </div>
 

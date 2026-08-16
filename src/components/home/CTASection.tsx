@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useScrollAnimation } from '../../hooks/useScrollAnimation';
-import { Compass, Flame, ShieldAlert, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import SectionDivider from '../shared/SectionDivider';
 
 export default function CTASection() {
@@ -46,19 +46,19 @@ export default function CTASection() {
           
           {/* Right column: Fahri Anggay Pop-out Card (Hero Reference Style) */}
           <div className="lg:col-span-4 flex justify-center w-full mt-8 lg:mt-0">
-            <div className="relative w-[240px] h-[320px] flex items-end justify-center group select-none">
+            <div className="relative w-[260px] h-[350px] sm:w-[290px] sm:h-[390px] flex items-end justify-center group select-none overflow-visible">
               {/* Backdrop Shape (Rounded like Hero) */}
-              <div className="absolute bottom-0 w-full h-[260px] bg-brand-yellow rounded-[100px_100px_30px_30px] border border-brand-dark/10 shadow-soft-lg z-0 transition-transform duration-300 group-hover:scale-[1.02]" />
+              <div className="absolute bottom-0 w-full h-[270px] sm:h-[310px] bg-brand-yellow rounded-[110px_110px_35px_35px] border border-brand-dark/10 shadow-soft-lg z-0 transition-transform duration-300 group-hover:scale-[1.02]" />
               
               {/* Character Image popping out */}
               <img 
-                src="/assets/model/FAHRI Anggay No BG.png" 
+                src="/assets/model/FAHRI Anggay No BG.webp" 
                 alt="Fahri Anggay — Pradana Putra"
-                className="absolute bottom-0 w-[320px] h-[290px] left-[-100%] right-[-100%] mx-auto z-10 max-w-none object-contain object-bottom select-none pointer-events-none transition-transform duration-300 group-hover:scale-[1.03]"
+                className="absolute bottom-0 z-10 w-full h-[340px] sm:h-[390px] object-contain object-bottom select-none pointer-events-none transition-transform duration-300 group-hover:scale-[1.03]"
               />
 
               {/* Name Label */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white px-4 py-1 rounded-full border border-brand-dark/10 shadow-soft z-20 font-kids text-[10px] font-bold text-brand-dark whitespace-nowrap">
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white px-4 py-1.5 rounded-full border border-brand-dark/10 shadow-soft z-20 font-kids text-[11px] font-bold text-brand-dark whitespace-nowrap">
                 ⚜️ Fahri — Pradana Putra
               </div>
             </div>

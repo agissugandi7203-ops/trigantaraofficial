@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { motion } from 'motion/react';
 import { JURUSAN_LIST, KELAS_LIST } from '../data/constants';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import SubpageHeader from '../components/shared/SubpageHeader';
@@ -57,7 +56,7 @@ export default function GabungPage() {
         title="Gabung Kami"
         subtitle="Isi formulir di bawah untuk mendaftar sebagai calon anggota Pramuka Trigantara."
         bgVariant="blue"
-        modelImage="/assets/model/FAHRI Anggay No BG.png"
+        modelImage="/assets/model/FAHRI Anggay No BG.webp"
         modelName="Fahri"
         modelAlign="right"
         modelSize="large"
@@ -180,11 +179,7 @@ export default function GabungPage() {
 
 function SuccessMessage({ onReset }: { onReset: () => void }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="bg-white rounded-[2.5rem] border border-brand-dark/15 p-8 sm:p-10 text-center shadow-soft-lg space-y-6"
-    >
+    <div className="animate-enter-pop bg-white rounded-[2.5rem] border border-brand-dark/15 p-8 sm:p-10 text-center shadow-soft-lg space-y-6">
       <div className="w-20 h-20 rounded-full bg-brand-green/10 border border-brand-green/20 flex items-center justify-center mx-auto shadow-soft">
         <ShieldCheck className="w-10 h-10 text-brand-green" />
       </div>
@@ -209,6 +204,6 @@ function SuccessMessage({ onReset }: { onReset: () => void }) {
           Daftar Lagi
         </button>
       </div>
-    </motion.div>
+    </div>
   );
 }

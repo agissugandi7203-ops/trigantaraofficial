@@ -90,21 +90,21 @@ export const TESTIMONIALS: TestimonialItem[] = [
     jabatan: 'Anggota Penegak Putri',
     pesan:
       'Bergabung di Trigantara mengubah cara pandang saya tentang kebersamaan. Di sini saya belajar bukan hanya keterampilan, tapi juga arti tanggung jawab dan solidaritas. Setiap kegiatan punya makna tersendiri.',
-    foto: '/assets/model/kaisya.png',
+    foto: '/assets/model/kaisya.webp',
   },
   {
     nama: 'Fahri Anggay',
     jabatan: 'Anggota Penegak Putra',
     pesan:
       'Awalnya ikut-ikutan teman, tapi lama-lama jadi cinta. Perkemahan, latihan tali temali, sampai ikut lomba — semua pengalaman yang tidak bisa didapat di kelas. Pramuka itu seru!',
-    foto: '/assets/model/FAHRI Anggay No BG.png',
+    foto: '/assets/model/FAHRI Anggay No BG.webp',
   },
   {
     nama: 'Nazwa',
     jabatan: 'Anggota Penegak Putri',
     pesan:
       'Di Trigantara, saya menemukan keluarga kedua. Dari yang tadinya pemalu, sekarang berani tampil di depan dan memimpin kelompok. Terima kasih Pramuka!',
-    foto: '/assets/model/nazwa.png',
+    foto: '/assets/model/nazwa.webp',
   },
 ];
 
@@ -221,6 +221,38 @@ export const KATEGORI_MATERI = [
   { value: 'survival', label: 'Survival & Alam' },
   { value: 'lainnya', label: 'Lainnya' },
 ];
+
+// ============================================
+// WARNA BADGE TINGKATAN
+// ============================================
+export const TINGKATAN_WARNA: Record<string, string> = {
+  siaga: 'bg-brand-yellow text-brand-dark',
+  penggalang: 'bg-brand-green text-white',
+  penegak: 'bg-brand-orange text-white',
+  umum: 'bg-brand-blue text-white',
+};
+
+// ============================================
+// KATEGORI ARTIKEL
+// ============================================
+export const KATEGORI_ARTIKEL = [
+  { value: 'semua', label: 'Semua Artikel' },
+  { value: 'berita', label: 'Berita Gudep' },
+  { value: 'wawasan', label: 'Wawasan' },
+  { value: 'sejarah', label: 'Sejarah' },
+  { value: 'tips', label: 'Tips Pramuka' },
+  { value: 'cerita', label: 'Cerita Anggota' },
+  { value: 'pengumuman', label: 'Pengumuman' },
+];
+
+export const WARNA_KATEGORI_ARTIKEL: Record<string, string> = {
+  berita: 'bg-brand-blue text-white',
+  wawasan: 'bg-brand-green text-white',
+  sejarah: 'bg-pramuka-brown text-white',
+  tips: 'bg-brand-green text-white',
+  cerita: 'bg-brand-yellow text-brand-dark',
+  pengumuman: 'bg-brand-orange text-white',
+};
 
 // ============================================
 // KATEGORI GALERI

@@ -1,41 +1,32 @@
-# ===== Stage 1: Build =====
+# syntax=docker/dockerfile:1
+
+# ---------- Tahap build ----------
 FROM node:22-slim AS builder
 
 WORKDIR /app
 
-# Copy package files
 COPY package.json package-lock.json ./
-
-# Install all dependencies (including devDependencies for build)
 RUN npm ci
 
-# Copy source code
 COPY . .
-
-# Build frontend (Vite) + backend (esbuild — fully bundled, no --packages=external)
 RUN npm run build
 
-# ===== Stage 2: Production =====
-# Server is fully self-contained in dist/server.cjs — no npm install needed
+# ---------- Tahap produksi ----------
+# Server sudah dibundel penuh ke dist/server.cjs, jadi tidak perlu node_modules.
 FROM node:22-slim AS production
 
 WORKDIR /app
 
-# Copy built artifacts from builder
-COPY --from=builder /app/dist ./dist
-
-# Copy public assets (served by express.static in production)
-COPY --from=builder /app/assets ./assets
-COPY --from=builder /app/public ./public
-
-# Set environment
 ENV NODE_ENV=production
-# PORT is injected by Cloud Run at runtime (default 8080)
-# server.ts reads process.env.PORT — do NOT hardcode here
 
-# Expose port (Cloud Run uses 8080 by default)
+# Jalankan sebagai pengguna non-root: bila proses berhasil dieksploitasi,
+# penyerang tidak langsung memperoleh hak root di dalam kontainer.
+RUN chown -R node:node /app
+USER node
+
+COPY --from=builder --chown=node:node /app/dist ./dist
+
+# PORT disuntikkan Cloud Run saat runtime (default 8080) — jangan dipaku di sini.
 EXPOSE 8080
 
-# Start server
 CMD ["node", "dist/server.cjs"]
-

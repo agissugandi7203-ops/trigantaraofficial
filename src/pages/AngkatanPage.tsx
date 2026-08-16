@@ -1,54 +1,102 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
-import SectionHeading from '../components/shared/SectionHeading';
-import SubpageHeader from '../components/shared/SubpageHeader';
-import { useScrollAnimation } from '../hooks/useScrollAnimation';
-import type { Angkatan, Member } from '../types';
+import { useCallback, useMemo, useState } from 'react';
 import { Users } from 'lucide-react';
+import { supabase, query } from '../lib/supabase';
+import SubpageHeader from '../components/shared/SubpageHeader';
+import { LoadingState, ErrorState } from '../components/shared/StateViews';
+import { useScrollAnimation } from '../hooks/useScrollAnimation';
+import { useAsyncData } from '../hooks/useAsyncData';
+import { useSeo } from '../hooks/useSeo';
+import type { Angkatan, PublicMember } from '../types';
 
-const FALLBACK_ANGKATAN: Angkatan[] = [
-  { id: 'local-1', tahun_ajaran: '2025-2026', nama_angkatan: 'Angkatan Pertama', foto_bersama_url: '/assets/angkatan/2025-2026/fotobersama26.webp', deskripsi: 'Angkatan perintis Trigantara yang membangun fondasi awal organisasi dan tata kelola ambalan.', is_active: false, created_at: '' },
-  { id: 'local-2', tahun_ajaran: '2026-2027', nama_angkatan: 'Angkatan Kedua', foto_bersama_url: '/assets/angkatan/2026-2027/fotobersama27.webp', deskripsi: 'Angkatan penerus estafet kepemimpinan Trigantara yang memperluas jangkauan kegiatan Gudep.', is_active: true, created_at: '' },
+const ANGKATAN_CADANGAN: Angkatan[] = [
+  {
+    id: 'lokal-2025',
+    tahun_ajaran: '2025-2026',
+    nama_angkatan: 'Angkatan Pertama',
+    foto_bersama_url: '/assets/angkatan/2025-2026/fotobersama26.webp',
+    deskripsi:
+      'Angkatan perintis Trigantara yang membangun fondasi awal organisasi dan tata kelola ambalan.',
+    is_active: false,
+    created_at: '',
+  },
+  {
+    id: 'lokal-2026',
+    tahun_ajaran: '2026-2027',
+    nama_angkatan: 'Angkatan Kedua',
+    foto_bersama_url: '/assets/angkatan/2026-2027/fotobersama27.webp',
+    deskripsi:
+      'Angkatan penerus estafet kepemimpinan Trigantara yang memperluas jangkauan kegiatan Gudep.',
+    is_active: true,
+    created_at: '',
+  },
 ];
 
+interface DataAngkatan {
+  angkatan: Angkatan[];
+  anggota: PublicMember[];
+}
+
 export default function AngkatanPage() {
-  const [angkatanList, setAngkatanList] = useState<Angkatan[]>([]);
-  const [members, setMembers] = useState<Record<string, Member[]>>({});
-  const [activeTab, setActiveTab] = useState<string>('');
-  const [loading, setLoading] = useState(true);
+  const [tabAktif, setTabAktif] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetch() {
-      const { data: angData } = await supabase.from('angkatan').select('*').order('tahun_ajaran', { ascending: false });
-      const list = angData && angData.length > 0 ? angData : FALLBACK_ANGKATAN;
-      setAngkatanList(list);
-      setActiveTab(list[0]?.id || '');
+  useSeo({
+    title: 'Arsip Angkatan',
+    description:
+      'Arsip angkatan dan pengurus Ambalan Ki Hajar Dewantara & Inggit Garnasih, Gugus Depan Trigantara SMK Marhas Margahayu.',
+    path: '/angkatan',
+  });
 
-      // Fetch members for all angkatan
-      if (angData && angData.length > 0) {
-        const { data: memData } = await supabase.from('members').select('*').neq('status', 'nonaktif');
-        if (memData) {
-          const grouped: Record<string, Member[]> = {};
-          memData.forEach((m) => { if (m.angkatan_id) { (grouped[m.angkatan_id] ||= []).push(m); } });
-          setMembers(grouped);
-        }
-      }
-      setLoading(false);
+  const fetchData = useCallback(async (signal: AbortSignal): Promise<DataAngkatan> => {
+    const angkatan = await query<Angkatan[]>(
+      supabase.from('angkatan').select('*').order('tahun_ajaran', { ascending: false }).abortSignal(signal)
+    );
+
+    // Daftar anggota diambil dari view `members_public` — proyeksi tanpa nomor
+    // HP, alamat, maupun data pribadi lain. Bila view belum ada (migrasi 002
+    // belum dijalankan), daftar anggota dikosongkan. Sengaja TIDAK jatuh ke
+    // tabel `members` sebagai cadangan: itu justru akan membocorkan data yang
+    // ingin dilindungi.
+    const { data, error } = await supabase
+      .from('members_public')
+      .select('*')
+      .eq('status', 'aktif')
+      .abortSignal(signal);
+
+    if (error) {
+      console.warn('[Trigantara] members_public belum tersedia — daftar anggota disembunyikan.');
+      return { angkatan, anggota: [] };
     }
-    fetch();
+
+    return { angkatan, anggota: (data as PublicMember[]) ?? [] };
   }, []);
 
-  const activeAngkatan = angkatanList.find((a) => a.id === activeTab);
+  const { data, loading, error, reload } = useAsyncData<DataAngkatan>(fetchData, [], {
+    angkatan: [],
+    anggota: [],
+  });
+
+  const daftarAngkatan = data.angkatan.length > 0 ? data.angkatan : ANGKATAN_CADANGAN;
+
+  const anggotaPerAngkatan = useMemo(() => {
+    const grup: Record<string, PublicMember[]> = {};
+    for (const m of data.anggota) {
+      if (!m.angkatan_id) continue;
+      (grup[m.angkatan_id] ??= []).push(m);
+    }
+    return grup;
+  }, [data.anggota]);
+
+  const idAktif = tabAktif ?? daftarAngkatan[0]?.id ?? '';
+  const angkatanAktif = daftarAngkatan.find((a) => a.id === idAktif);
 
   return (
     <main className="min-h-screen bg-cream-bg text-brand-dark">
-      {/* SubpageHeader replacing flat hero banner */}
       <SubpageHeader
         badge="Arsip Sejarah"
         title="Arsip Angkatan"
         subtitle="Setiap angkatan punya ceritanya sendiri. Temukan jejak mereka di sini."
         bgVariant="orange"
-        modelImage="/assets/model/kaisya.png"
+        modelImage="/assets/model/kaisya.webp"
         modelName="Kaisya"
         modelAlign="right"
         modelSize="large"
@@ -57,32 +105,37 @@ export default function AngkatanPage() {
       <section className="py-16 lg:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {loading ? (
-            <div className="flex justify-center py-16">
-              <div className="w-8 h-8 border-4 border-brand-dark border-t-brand-orange rounded-full animate-spin" />
-            </div>
+            <LoadingState label="Memuat data angkatan…" />
+          ) : error ? (
+            <ErrorState message={error} onRetry={reload} />
           ) : (
             <>
-              {/* Tabs */}
-              <div className="flex flex-wrap gap-3 mb-12 justify-center">
-                {angkatanList.map((a) => (
+              <div role="tablist" aria-label="Pilih angkatan" className="flex flex-wrap gap-3 mb-12 justify-center">
+                {daftarAngkatan.map((a) => (
                   <button
                     key={a.id}
-                    onClick={() => setActiveTab(a.id)}
-                    className={`px-5 py-2 rounded-full text-xs sm:text-sm font-kids font-bold border-2 transition-all cursor-pointer ${
-                      activeTab === a.id
-                        ? 'bg-brand-dark text-white border-brand-dark shadow-[2px_2px_0_rgba(0,0,0,0.15)]'
-                        : 'bg-white text-brand-dark border-brand-dark/20 hover:border-brand-dark'
+                    type="button"
+                    role="tab"
+                    aria-selected={idAktif === a.id}
+                    onClick={() => setTabAktif(a.id)}
+                    className={`px-5 py-2 rounded-full text-xs sm:text-sm font-kids font-bold border transition-all cursor-pointer ${
+                      idAktif === a.id
+                        ? 'bg-brand-dark text-white border-brand-dark shadow-soft'
+                        : 'bg-white text-brand-dark border-brand-dark/10 hover:border-brand-dark/25'
                     }`}
                   >
-                    <span>TA {a.tahun_ajaran}</span>
-                    {a.is_active && <span className="ml-1 text-[10px]">✨ Aktif</span>}
+                    TA {a.tahun_ajaran}
+                    {a.is_active && <span className="ml-1.5 text-[10px]">✨ Aktif</span>}
                   </button>
                 ))}
               </div>
 
-              {/* Content */}
-              {activeAngkatan && (
-                <AngkatanDetail angkatan={activeAngkatan} members={members[activeAngkatan.id] || []} />
+              {angkatanAktif && (
+                <DetailAngkatan
+                  key={angkatanAktif.id}
+                  angkatan={angkatanAktif}
+                  anggota={anggotaPerAngkatan[angkatanAktif.id] ?? []}
+                />
               )}
             </>
           )}
@@ -92,78 +145,93 @@ export default function AngkatanPage() {
   );
 }
 
-function AngkatanDetail({ angkatan, members }: { angkatan: Angkatan; members: Member[] }) {
+function DetailAngkatan({ angkatan, anggota }: { angkatan: Angkatan; anggota: PublicMember[] }) {
   const { ref, isVisible } = useScrollAnimation();
 
   return (
     <div ref={ref} className={`animate-slide-up ${isVisible ? 'visible' : ''}`}>
-      {/* Foto Bersama */}
       {angkatan.foto_bersama_url && (
-        <div className="relative rounded-[2rem] border border-brand-dark/15 overflow-hidden aspect-[21/9] mb-10 bg-cream-dark shadow-soft-lg flex items-end">
+        <figure className="relative rounded-[2rem] border border-brand-dark/15 overflow-hidden aspect-[21/9] mb-10 bg-cream-dark shadow-soft-lg flex items-end">
           <img
             src={angkatan.foto_bersama_url}
-            alt={`Foto bersama ${angkatan.tahun_ajaran}`}
+            alt={`Foto bersama angkatan ${angkatan.tahun_ajaran}`}
+            loading="lazy"
+            decoding="async"
             className="absolute inset-0 w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/50 via-transparent to-transparent pointer-events-none" />
-          
-          <div className="bg-white border border-brand-dark/10 rounded-2xl p-4 m-4 sm:m-6 shadow-soft relative z-10 text-brand-dark text-left inline-block max-w-sm">
+          <div
+            className="absolute inset-0 bg-gradient-to-t from-brand-dark/50 via-transparent to-transparent"
+            aria-hidden="true"
+          />
+          <figcaption className="bg-white border border-brand-dark/10 rounded-2xl p-4 m-4 sm:m-6 shadow-soft relative z-10 max-w-sm">
             <h2 className="font-serif text-lg sm:text-2xl font-black leading-tight">
               {angkatan.nama_angkatan || `Angkatan ${angkatan.tahun_ajaran}`}
             </h2>
-            <p className="text-[10px] font-kids font-bold text-brand-orange uppercase tracking-wider mt-0.5">Tahun Ajaran {angkatan.tahun_ajaran}</p>
-          </div>
-        </div>
+            <p className="text-[10px] font-kids font-bold text-brand-orange uppercase tracking-wider mt-0.5">
+              Tahun Ajaran {angkatan.tahun_ajaran}
+            </p>
+          </figcaption>
+        </figure>
       )}
 
       {angkatan.deskripsi && (
-        <div className="bg-white/40 p-6 rounded-3xl border-2 border-brand-dark/25 text-center max-w-3xl mx-auto mb-16 shadow-inner">
-          <p className="text-brand-dark/85 leading-relaxed text-sm sm:text-base font-sans font-medium">
+        <div className="bg-white/60 p-6 rounded-3xl border border-brand-dark/15 text-center max-w-3xl mx-auto mb-16 shadow-soft">
+          <p className="text-brand-dark/85 leading-relaxed text-sm sm:text-base font-sans">
             {angkatan.deskripsi}
           </p>
         </div>
       )}
 
-      {/* Members */}
-      {members.length > 0 && (
+      {anggota.length > 0 && (
         <div className="space-y-8">
           <div className="text-center">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-orange/10 text-brand-orange border border-brand-orange/20 rounded-full text-xs font-kids font-bold uppercase mb-2">
               <Users className="w-3.5 h-3.5" />
-              <span>Daftar Anggota</span>
+              Daftar Anggota
             </span>
             <h3 className="font-serif text-2xl sm:text-3xl font-black text-brand-dark">
-              Anggota Aktif & Pengurus ({members.length} Orang)
+              Anggota Aktif &amp; Pengurus ({anggota.length} orang)
             </h3>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-            {members.map((m) => (
-              <div key={m.id} className="bg-cream-card rounded-2xl border border-brand-dark/15 p-5 text-center shadow-soft hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center group">
-                <div className="w-18 h-18 rounded-full border border-brand-dark/10 overflow-hidden bg-white shadow-soft mb-4 flex items-center justify-center group-hover:scale-105 transition-all shrink-0">
+          <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            {anggota.map((m) => (
+              <li
+                key={m.id}
+                className="bg-cream-card rounded-2xl border border-brand-dark/15 p-5 text-center shadow-soft hover:shadow-md hover:-translate-y-1 transition-[transform,box-shadow] duration-300 flex flex-col items-center group"
+              >
+                <div className="w-16 h-16 rounded-full border border-brand-dark/10 overflow-hidden bg-white shadow-soft mb-4 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
                   {m.foto_url ? (
-                    <img src={m.foto_url} alt={m.nama_lengkap} className="w-full h-full object-cover object-top" />
+                    <img
+                      src={m.foto_url}
+                      alt={m.nama_lengkap}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-cover object-top"
+                    />
                   ) : (
-                    <span className="text-2xl select-none">
+                    <span className="text-2xl" aria-hidden="true">
                       {m.ambalan === 'putra' ? '👦' : '👧'}
                     </span>
                   )}
                 </div>
-                
-                <p className="text-xs sm:text-sm font-kids font-bold text-brand-dark line-clamp-1">{m.nama_lengkap}</p>
-                
-                {m.jabatan ? (
-                  <span className="px-2.5 py-0.5 mt-1.5 text-[9px] bg-brand-orange/10 text-brand-orange border border-brand-orange/20 rounded-full font-kids font-bold uppercase leading-none">
-                    {m.jabatan}
-                  </span>
-                ) : (
-                  <span className="px-2.5 py-0.5 mt-1.5 text-[9px] bg-brand-green/10 text-brand-green border border-brand-green/20 rounded-full font-kids font-bold uppercase leading-none">
-                    Anggota
-                  </span>
-                )}
-              </div>
+
+                <p className="text-xs sm:text-sm font-kids font-bold text-brand-dark line-clamp-2">
+                  {m.nama_lengkap}
+                </p>
+
+                <span
+                  className={`px-2.5 py-0.5 mt-1.5 text-[9px] rounded-full font-kids font-bold uppercase leading-none border ${
+                    m.jabatan
+                      ? 'bg-brand-orange/10 text-brand-orange border-brand-orange/20'
+                      : 'bg-brand-green/10 text-brand-green border-brand-green/20'
+                  }`}
+                >
+                  {m.jabatan || 'Anggota'}
+                </span>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       )}
     </div>

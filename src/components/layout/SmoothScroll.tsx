@@ -1,47 +1,36 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Lenis from 'lenis';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
+/**
+ * Penghalus gulir untuk desktop / roda tetikus.
+ * Pada perangkat layar sentuh (ponsel/tablet), gulir dibiarkan 100% natif bawaan sistem
+ * operasi agar memanfaatkan akselerasi GPU 60Hz/120Hz tanpa tersendat sedikit pun.
+ */
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
-  const location = useLocation();
+  const { pathname } = useLocation();
+  const isAdmin = pathname.startsWith('/admin');
 
   useEffect(() => {
-    // Disable smooth scrolling on admin panel to keep interactions standard and responsive
-    if (location.pathname.startsWith('/admin')) {
-      return;
-    }
+    if (isAdmin) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    // Register GSAP ScrollTrigger
-    gsap.registerPlugin(ScrollTrigger);
+    // Lewati inisialisasi pada perangkat sentuh agar performa gulir di ponsel sangat lancar
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (isTouch) return;
 
-    // Initialize Lenis with smooth desktop configurations
     const lenis = new Lenis({
-      duration: 1.2,
+      duration: 0.9,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       gestureOrientation: 'vertical',
       smoothWheel: true,
-      wheelMultiplier: 1.0,
-      touchMultiplier: 1.2,
+      syncTouch: false,
+      autoRaf: true,
     });
 
-    // Sync ScrollTrigger updates with Lenis scroll events
-    lenis.on('scroll', ScrollTrigger.update);
-
-    // Sync GSAP ticker frame callback with Lenis RAF loop for 60fps/120fps sync
-    const rafCallback = (time: number) => {
-      lenis.raf(time * 1000);
-    };
-    gsap.ticker.add(rafCallback);
-    gsap.ticker.lagSmoothing(0);
-
-    return () => {
-      lenis.destroy();
-      gsap.ticker.remove(rafCallback);
-    };
-  }, [location.pathname]);
+    return () => lenis.destroy();
+  }, [isAdmin]);
 
   return <>{children}</>;
 }

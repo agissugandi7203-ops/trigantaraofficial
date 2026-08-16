@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import ConfirmModal from '../../components/admin/ConfirmModal';
-import { motion, AnimatePresence } from 'motion/react';
 import {
   LayoutDashboard,
   FileText,
@@ -101,17 +100,13 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       </div>
 
       {/* Sidebar overlay (mobile) */}
-      <AnimatePresence>
-        {sidebarOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-zinc-950/20 backdrop-blur-sm z-40 lg:hidden cursor-pointer"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-      </AnimatePresence>
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-zinc-950/20 backdrop-blur-sm z-40 lg:hidden cursor-pointer animate-fade-in visible"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
 
       {/* Sidebar */}
       <aside

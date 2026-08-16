@@ -1,8 +1,14 @@
 import { Link } from "react-router-dom";
-import { motion } from "motion/react";
-import { Compass, AlertCircle, Home, ArrowLeft } from "lucide-react";
+import { Compass, Home, ArrowLeft } from "lucide-react";
+import { useSeo } from "../hooks/useSeo";
 
 export default function NotFoundPage() {
+  useSeo({
+    title: "Halaman Tidak Ditemukan",
+    description: "Halaman yang kamu cari tidak ada di website Gugus Depan Trigantara.",
+    noIndex: true,
+  });
+
   return (
     <main className="min-h-screen bg-cream-bg text-brand-dark selection:bg-brand-yellow font-sans pt-24 pb-12 flex items-center justify-center relative overflow-hidden">
       {/* Background elements */}
@@ -17,11 +23,7 @@ export default function NotFoundPage() {
       </div>
 
       <div className="max-w-md w-full mx-auto px-4 z-10">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-white rounded-[2rem] border-4 border-brand-dark p-8 md:p-10 shadow-[8px_8px_0_#2A1B15] text-center space-y-6"
-        >
+        <div className="animate-enter-pop bg-white rounded-[2rem] border-4 border-brand-dark p-8 md:p-10 shadow-[8px_8px_0_#2A1B15] text-center space-y-6">
           {/* Animated Mascot/Compass Badge */}
           <div className="flex justify-center">
             <div className="relative p-6 bg-brand-yellow border-4 border-brand-dark rounded-full shadow-[4px_4px_0_#2A1B15] animate-float">
@@ -61,7 +63,7 @@ export default function NotFoundPage() {
               <span>Kembali</span>
             </button>
           </div>
-        </motion.div>
+        </div>
       </div>
     </main>
   );

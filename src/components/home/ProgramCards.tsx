@@ -115,6 +115,8 @@ function ProgramCard({
           <img
             src={details.image}
             alt={program.title}
+            loading="lazy"
+            decoding="async"
             className={`${index === 2 ? 'h-[90%] w-auto object-contain' : 'w-full h-full object-cover object-center'} group-hover:scale-105 transition-transform duration-500`}
           />
           <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-brand-dark text-white text-[9px] font-bold rounded">

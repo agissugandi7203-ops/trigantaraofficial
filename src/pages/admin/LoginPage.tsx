@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { motion } from 'motion/react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -36,11 +35,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md"
-      >
+      <div className="w-full max-w-md animate-enter-up">
         <div className="bg-white rounded-2xl shadow-2xl p-8 lg:p-10">
           {/* Logo */}
           <div className="text-center mb-8">
@@ -99,7 +94,7 @@ export default function LoginPage() {
             </Link>
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

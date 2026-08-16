@@ -4,7 +4,7 @@ import { KATEGORI_GALERI } from '../../data/constants';
 import type { GalleryItem } from '../../types';
 import ConfirmModal from '../../components/admin/ConfirmModal';
 import { uploadFileToR2 } from '../../lib/r2';
-import { Image as ImageIcon, Trash2, Plus, X, UploadCloud, FileImage, Check } from 'lucide-react';
+import { Image as ImageIcon, Trash2, X, UploadCloud, FileImage } from 'lucide-react';
 
 export default function ManageGallery() {
   const [items, setItems] = useState<GalleryItem[]>([]);

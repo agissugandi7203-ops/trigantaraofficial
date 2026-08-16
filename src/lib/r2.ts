@@ -103,13 +103,30 @@ export async function uploadFileToR2(
 
 /**
  * Helper untuk memformat URL R2 publik.
- * Jika R2 belum punya custom domain, gunakan URL default.
+ * Otomatis mengarahkan ke endpoint proxy /api/storage/ agar tidak pernah
+ * mengalami kegagalan sertifikat SSL bawaan Cloudflare (ERR_CERT_COMMON_NAME_INVALID).
  */
-export function getR2PublicUrl(key: string): string {
-  const r2PublicBase = import.meta.env.VITE_R2_PUBLIC_URL || (window as any).ENV?.VITE_R2_PUBLIC_URL || '';
-  if (!r2PublicBase) {
-    // Placeholder — ganti dengan URL R2 bucket Anda
-    return `/api/files/${key}`;
+export function getR2PublicUrl(key: string | undefined | null): string {
+  if (!key) return '';
+  const trimmed = key.trim();
+  
+  // Jika URL mengarah ke domain r2.dev bawaan Cloudflare
+  if (trimmed.includes('.r2.dev/')) {
+    const path = trimmed.split('.r2.dev/')[1]?.split('?')[0];
+    return `/api/storage/${path}`;
   }
-  return `${r2PublicBase}/${key}`;
+  // Jika sudah merupakan endpoint proxy lokal /api/storage/
+  if (trimmed.startsWith('/api/storage/')) {
+    return trimmed;
+  }
+  // Jika URL http(s) eksternal selain r2.dev (misal Wikimedia / Unsplash / Google)
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:') || trimmed.startsWith('blob:')) {
+    return trimmed;
+  }
+  // Jika path lokal statis
+  if (trimmed.startsWith('/assets/')) {
+    return trimmed;
+  }
+  // Jika kunci R2 mentah (contoh: 'konten/materi-sandi-morse.jpg')
+  return `/api/storage/${trimmed.replace(/^\/+/, '')}`;
 }

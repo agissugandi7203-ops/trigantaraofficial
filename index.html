@@ -1,56 +1,119 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
-    <!-- SEO Primary -->
-    <title>Pramuka SMK Marhas Margahayu — Siap Sedia, Jaya, Juara!</title>
-    <meta name="description" content="Website resmi Pramuka SMK Marhas Margahayu — Gugus Depan Trigantara. Bergabung bersama kami dalam petualangan, keterampilan, kepemimpinan, dan raih prestasi." />
-    <meta name="keywords" content="pramuka, trigantara, SMK Marhas, Margahayu, siap sedia jaya juara, kepramukaan, bandung, penegak" />
-    <meta name="author" content="Pramuka SMK Marhas Margahayu" />
-    <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://trigantara.web.id" />
-    
-    <!-- Favicon -->
+
+    <!-- ==================================================================
+         Font
+         ------------------------------------------------------------------
+         `preconnect` membuka koneksi ke server font lebih awal (DNS + TLS
+         berjalan berbarengan dengan pengunduhan HTML), sehingga teks tampil
+         lebih cepat. Sebelumnya font dimuat lewat @import di dalam CSS —
+         peramban baru tahu font dibutuhkan SETELAH CSS selesai diunduh dan
+         dibaca, sebuah antrean bertingkat yang menunda tampilnya teks.
+         ================================================================== -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Fredoka:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap"
+    />
+
+    <!-- ================= SEO utama ================= -->
+    <title>Pramuka SMK Marhas Margahayu — Gugus Depan Trigantara</title>
+    <meta
+      name="description"
+      content="Website resmi Gugus Depan Trigantara, Pramuka SMK Marhas Margahayu, Bandung. Materi kepramukaan lengkap, agenda kegiatan, galeri, dan pendaftaran anggota baru."
+    />
+    <meta
+      name="keywords"
+      content="pramuka, trigantara, SMK Marhas Margahayu, gugus depan 29.039, kepramukaan, penegak, ambalan, materi pramuka, bandung"
+    />
+    <meta name="author" content="Gugus Depan Trigantara — SMK Marhas Margahayu" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <link rel="canonical" href="https://trigantara.web.id/" />
+
+    <!-- ================= Ikon ================= -->
     <link rel="icon" type="image/webp" href="/assets/logo/LOGO TRIGANTARA (2).webp" />
     <link rel="apple-touch-icon" href="/assets/logo/LOGO TRIGANTARA (2).webp" />
-    
-    <!-- Open Graph / Facebook -->
+    <meta name="theme-color" content="#FF6E31" />
+
+    <!-- ================= Open Graph (WhatsApp, Facebook) ================= -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://trigantara.web.id" />
-    <meta property="og:title" content="Pramuka SMK Marhas Margahayu — Siap Sedia, Jaya, Juara!" />
-    <meta property="og:description" content="Website resmi Pramuka SMK Marhas Margahayu. Bergabung bersama Gugus Depan Trigantara dalam petualangan, keterampilan, dan kepemimpinan." />
-    <meta property="og:image" content="https://trigantara.web.id/assets/logo/LOGO%20TRIGANTARA%20(2).webp" />
+    <meta property="og:site_name" content="Trigantara" />
+    <meta property="og:url" content="https://trigantara.web.id/" />
+    <meta property="og:title" content="Pramuka SMK Marhas Margahayu — Gugus Depan Trigantara" />
+    <meta
+      property="og:description"
+      content="Materi kepramukaan lengkap, agenda kegiatan, galeri, dan pendaftaran anggota baru Gugus Depan Trigantara."
+    />
+    <meta
+      property="og:image"
+      content="https://trigantara.web.id/assets/logo/LOGO%20TRIGANTARA%20(2).webp"
+    />
+    <meta property="og:image:alt" content="Logo Gugus Depan Trigantara" />
     <meta property="og:locale" content="id_ID" />
-    
-    <!-- Twitter Card -->
+
+    <!-- ================= Twitter / X ================= -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Pramuka SMK Marhas Margahayu — Siap Sedia, Jaya, Juara!" />
-    <meta name="twitter:description" content="Website resmi Gugus Depan Trigantara — Pramuka SMK Marhas Margahayu." />
-    <meta name="twitter:image" content="https://trigantara.web.id/assets/logo/LOGO%20TRIGANTARA%20(2).webp" />
-    
-    <!-- Theme Color -->
-    <meta name="theme-color" content="#4A2618" />
-    
-    <!-- Structured Data -->
+    <meta name="twitter:title" content="Pramuka SMK Marhas Margahayu — Gugus Depan Trigantara" />
+    <meta
+      name="twitter:description"
+      content="Website resmi Gugus Depan Trigantara — Pramuka SMK Marhas Margahayu, Bandung."
+    />
+    <meta
+      name="twitter:image"
+      content="https://trigantara.web.id/assets/logo/LOGO%20TRIGANTARA%20(2).webp"
+    />
+
+    <!-- ================= Data terstruktur ================= -->
     <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "Trigantara — Gugus Depan 29.039-29.040",
-      "description": "Gugus Depan Pramuka SMK Marhas Margahayu",
-      "url": "https://trigantara.web.id",
-      "logo": "/assets/logo/LOGO TRIGANTARA (2).webp",
-      "parentOrganization": {
+      {
+        "@context": "https://schema.org",
         "@type": "EducationalOrganization",
-        "name": "SMK Marhas Margahayu"
+        "name": "Gugus Depan Trigantara",
+        "alternateName": "Pramuka SMK Marhas Margahayu",
+        "description": "Gugus Depan Pramuka 29.039 - 29.040 berpangkalan di SMK Marhas Margahayu, Bandung, Jawa Barat.",
+        "url": "https://trigantara.web.id/",
+        "logo": "https://trigantara.web.id/assets/logo/LOGO%20TRIGANTARA%20(2).webp",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Margahayu",
+          "addressRegion": "Jawa Barat",
+          "addressCountry": "ID"
+        },
+        "parentOrganization": {
+          "@type": "EducationalOrganization",
+          "name": "SMK Marhas Margahayu"
+        },
+        "sameAs": [
+          "https://instagram.com/Trigantara_official14",
+          "https://youtube.com/@marhasupdate",
+          "https://tiktok.com/@pramukasmkmarhas"
+        ]
       }
-    }
     </script>
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- Pesan untuk pengunjung yang mematikan JavaScript. Tanpa ini mereka
+         hanya melihat halaman putih kosong tanpa penjelasan. -->
+    <noscript>
+      <div style="max-width:640px;margin:4rem auto;padding:2rem;font-family:system-ui,sans-serif;line-height:1.7;color:#2A1B15;text-align:center">
+        <h1 style="font-size:1.5rem;margin-bottom:.75rem">Gugus Depan Trigantara</h1>
+        <p>
+          Website ini memerlukan JavaScript untuk ditampilkan. Mohon aktifkan JavaScript
+          di peramban Anda, lalu muat ulang halaman ini.
+        </p>
+        <p style="margin-top:1rem">
+          Butuh bantuan? Hubungi kami lewat Instagram
+          <a href="https://instagram.com/Trigantara_official14">@Trigantara_official14</a>.
+        </p>
+      </div>
+    </noscript>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -24,7 +24,7 @@ export default function ManageMembers() {
     no_hp: '', 
     alamat: '', 
     nomor_kta: '', 
-    status: 'aktif' as const 
+    status: 'aktif' as Member['status'] 
   });
 
   const fetchData = async () => {

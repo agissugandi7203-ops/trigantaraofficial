@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { 
   Users, 
+  BookOpen,
   FileText, 
   Calendar, 
   ClipboardList, 
@@ -17,6 +18,7 @@ import {
 
 interface Stats {
   members: number;
+  materials: number;
   articles: number;
   events: number;
   pendaftaran: number;
@@ -31,7 +33,7 @@ interface ActivityLog {
 }
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState<Stats>({ members: 0, articles: 0, events: 0, pendaftaran: 0 });
+  const [stats, setStats] = useState<Stats>({ members: 0, materials: 0, articles: 0, events: 0, pendaftaran: 0 });
   const [recentPendaftaran, setRecentPendaftaran] = useState<any[]>([]);
   const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
   const [activities, setActivities] = useState<ActivityLog[]>([]);
@@ -43,8 +45,9 @@ export default function DashboardPage() {
       try {
         const today = new Date().toISOString().split('T')[0];
         
-        const [m, a, e, p, rp, ue, recentArticles, recentMembers] = await Promise.all([
+        const [m, mat, a, e, p, rp, ue, recentArticles, recentMembers] = await Promise.all([
           supabase.from('members').select('id', { count: 'exact', head: true }),
+          supabase.from('materials').select('id', { count: 'exact', head: true }),
           supabase.from('articles').select('id', { count: 'exact', head: true }),
           supabase.from('events').select('id', { count: 'exact', head: true }),
           supabase.from('pendaftaran').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
@@ -56,6 +59,7 @@ export default function DashboardPage() {
 
         setStats({
           members: m.count || 0,
+          materials: mat.count || 0,
           articles: a.count || 0,
           events: e.count || 0,
           pendaftaran: p.count || 0,
@@ -124,6 +128,13 @@ export default function DashboardPage() {
       link: '/admin/anggota' 
     },
     { 
+      label: 'Total Materi', 
+      value: stats.materials, 
+      icon: BookOpen, 
+      color: 'text-amber-700 bg-amber-50/40 hover:bg-amber-50/85 border-amber-100/70', 
+      link: '/admin/materi' 
+    },
+    { 
       label: 'Total Artikel', 
       value: stats.articles, 
       icon: FileText, 
@@ -180,7 +191,7 @@ export default function DashboardPage() {
       ) : (
         <>
           {/* Stats Grid */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {statCards.map((s) => {
               const Icon = s.icon;
               return (

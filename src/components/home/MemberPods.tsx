@@ -65,7 +65,7 @@ export default function MemberPods() {
                 <img
                   src={item.image}
                   alt={item.nama}
-                  className="absolute bottom-0 w-[280px] h-[250px] left-[-100%] right-[-100%] mx-auto z-10 max-w-none object-cover object-top select-none pointer-events-none transition-transform duration-300 group-hover:scale-[1.03]"
+                  className="absolute bottom-0 w-auto h-[260px] max-w-none object-contain object-bottom select-none pointer-events-none transition-transform duration-300 group-hover:scale-[1.04]"
                 />
 
                 {/* Floating Badge */}
