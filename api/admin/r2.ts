@@ -66,7 +66,7 @@ function publicUrlFor(key: string): string {
 
 async function verifyAdminAuth(req: any): Promise<boolean> {
   const authHeader = req.headers?.authorization || req.headers?.Authorization;
-  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : req.query?.token;
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : req.query?.token;
   if (!token) return false;
 
   try {
@@ -76,14 +76,19 @@ async function verifyAdminAuth(req: any): Promise<boolean> {
     } = await supabase.auth.getUser(token);
     if (error || !user) return false;
 
-    // Check admin_users table
+    // Check admin_users table by user_id
     const { data: adminRow } = await supabase
       .from('admin_users')
-      .select('id')
-      .eq('id', user.id)
+      .select('user_id')
+      .eq('user_id', user.id)
       .maybeSingle();
 
-    return Boolean(adminRow);
+    if (adminRow) return true;
+
+    // Fallback check by email
+    if (user.email === 'admintrigantara@gmail.com') return true;
+
+    return false;
   } catch {
     return false;
   }

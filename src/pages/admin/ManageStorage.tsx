@@ -1,5 +1,6 @@
 import { useEffect, useState, ChangeEvent, MouseEvent as ReactMouseEvent, DragEvent, useRef } from 'react';
 import ConfirmModal from '../../components/admin/ConfirmModal';
+import { supabase } from '../../lib/supabase';
 import { 
   FolderOpen, FileImage, Trash2, UploadCloud, FolderPlus, 
   ChevronRight, Home, RefreshCw, File, ArrowLeft, Download,
@@ -42,6 +43,16 @@ export default function ManageStorage() {
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
   const [showDeleteSelectedConfirm, setShowDeleteSelectedConfirm] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [token, setToken] = useState<string>(() => localStorage.getItem('trigantara_admin_token') || '');
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (data?.session?.access_token) {
+        setToken(data.session.access_token);
+        localStorage.setItem('trigantara_admin_token', data.session.access_token);
+      }
+    });
+  }, []);
 
   // Clear selection when navigating to another folder
   useEffect(() => {
@@ -95,16 +106,26 @@ export default function ManageStorage() {
     }
   };
 
-  const token = localStorage.getItem('trigantara_admin_token');
-
   const fetchItems = async (forceRefresh = false) => {
     setLoading(true);
     setError(null);
     try {
+      let currentToken = localStorage.getItem('trigantara_admin_token');
+      if (!currentToken) {
+        const { data } = await supabase.auth.getSession();
+        if (data?.session?.access_token) {
+          currentToken = data.session.access_token;
+          localStorage.setItem('trigantara_admin_token', currentToken);
+        }
+      }
+
       const res = await fetch(`/api/admin/r2/list?prefix=${encodeURIComponent(currentPrefix)}&refresh=${forceRefresh}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: currentToken ? { Authorization: `Bearer ${currentToken}` } : {},
       });
-      if (!res.ok) throw new Error('Gagal memuat data storage.');
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || 'Gagal memuat data storage.');
+      }
       const data = await res.json();
       setFolders(data.folders || []);
       setFiles(data.files || []);
