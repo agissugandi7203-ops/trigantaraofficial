@@ -38,10 +38,11 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  // Parse object key from query param or URL
+  // Parse object key from query param, dynamic route, or URL
   let rawKey = '';
-  if (req.query?.key) {
-    rawKey = Array.isArray(req.query.key) ? req.query.key.join('/') : String(req.query.key);
+  const qKey = req.query?.key ?? req.query?.['...key'] ?? req.query?.params;
+  if (qKey) {
+    rawKey = Array.isArray(qKey) ? qKey.join('/') : String(qKey);
   } else {
     const url = req.url || '';
     const match = url.match(/\/api\/storage\/(.+?)(\?.*)?$/);
