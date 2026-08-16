@@ -4,14 +4,6 @@
   "framework": "vite",
   "rewrites": [
     {
-      "source": "/sitemap.xml",
-      "destination": "/api/sitemap"
-    },
-    {
-      "source": "/robots.txt",
-      "destination": "/api/robots"
-    },
-    {
       "source": "/api/storage/:key*",
       "destination": "/api/storage?key=:key*"
     },
@@ -28,7 +20,7 @@
       "destination": "/api/admin/r2?action=upload-url"
     },
     {
-      "source": "/((?!api/).*)",
+      "source": "/((?!api/|sitemap\\.xml|robots\\.txt).*)",
       "destination": "/index.html"
     }
   ]
