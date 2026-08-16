@@ -64,43 +64,33 @@ function publicUrlFor(key: string): string {
   return `/api/storage/${key.replace(/^\/+/, '')}`;
 }
 
-async function verifyAdminAuth(req: any): Promise<boolean> {
+async function verifyAdminAuthDebug(req: any): Promise<{ success: boolean; reason: string }> {
   const authHeader = req.headers?.authorization || req.headers?.Authorization;
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : req.query?.token;
-  if (!token) return false;
+  if (!token) return { success: false, reason: 'No token found in headers or query' };
 
   try {
     const {
       data: { user },
       error,
     } = await supabase.auth.getUser(token);
-    if (error || !user) return false;
+    if (error) return { success: false, reason: `getUser error: ${error.message}` };
+    if (!user) return { success: false, reason: 'No user returned from token' };
 
     // Check admin_users table by user_id
-    const { data: adminRow } = await supabase
+    const { data: adminRow, error: dbError } = await supabase
       .from('admin_users')
       .select('user_id')
       .eq('user_id', user.id)
       .maybeSingle();
 
-    if (adminRow) return true;
+    if (adminRow) return { success: true, reason: 'admin_users match' };
+    if (user.email === 'admintrigantara@gmail.com') return { success: true, reason: 'email fallback match' };
 
-    // Fallback check by email
-    if (user.email === 'admintrigantara@gmail.com') return true;
-
-    return false;
-  } catch {
-    return false;
+    return { success: false, reason: `user ${user.email} (${user.id}) not in admin_users, dbError: ${dbError?.message || 'none'}` };
+  } catch (err: any) {
+    return { success: false, reason: `Exception: ${err.message}` };
   }
-}
-
-async function readBody(req: any): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    req.on('data', (chunk: Buffer) => chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)));
-    req.on('end', () => resolve(Buffer.concat(chunks)));
-    req.on('error', reject);
-  });
 }
 
 export default async function handler(req: any, res: any) {
@@ -132,11 +122,16 @@ export default async function handler(req: any, res: any) {
   action = action.replace(/^r2\//, '');
 
   // Auth check
-  const isAdmin = await verifyAdminAuth(req);
-  if (!isAdmin) {
+  const authDebug = await verifyAdminAuthDebug(req);
+  if (!authDebug.success) {
     res.statusCode = 401;
     res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ error: 'Akses ditolak. Sesi pengelola tidak valid atau telah kedaluwarsa.' }));
+    res.end(
+      JSON.stringify({
+        error: 'Akses ditolak. Sesi pengelola tidak valid atau telah kedaluwarsa.',
+        reason: authDebug.reason,
+      })
+    );
     return;
   }
 
